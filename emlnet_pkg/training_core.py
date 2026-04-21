@@ -20,6 +20,25 @@ class RunHistory:
     val_acc: list[float] = field(default_factory=list)
     grad_norm: list[float] = field(default_factory=list)
 
+    def to_dict(self) -> dict[str, list[float]]:
+        return {
+            "train_loss": list(self.train_loss),
+            "val_loss": list(self.val_loss),
+            "train_acc": list(self.train_acc),
+            "val_acc": list(self.val_acc),
+            "grad_norm": list(self.grad_norm),
+        }
+
+    @staticmethod
+    def from_dict(d: dict[str, list[float]]) -> "RunHistory":
+        return RunHistory(
+            train_loss=list(d.get("train_loss", [])),
+            val_loss=list(d.get("val_loss", [])),
+            train_acc=list(d.get("train_acc", [])),
+            val_acc=list(d.get("val_acc", [])),
+            grad_norm=list(d.get("grad_norm", [])),
+        )
+
 
 def bce_accuracy(logits: torch.Tensor, y: torch.Tensor) -> float:
     with torch.no_grad():

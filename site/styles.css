@@ -78,6 +78,15 @@ nav a {
   font-weight: 500;
 }
 
+.banner {
+  margin: 0;
+  padding: 0.65rem 1.5rem;
+  background: rgba(94, 184, 255, 0.12);
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
 main {
   max-width: 1100px;
   margin: 0 auto;
@@ -199,6 +208,108 @@ tbody tr:hover td {
   width: 100%;
   height: auto;
   background: #0a0e14;
+}
+
+.subhead {
+  margin: 1.75rem 0 0.75rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  margin: 1rem 0 1.5rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.filters select {
+  min-width: 10rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
+.heatmap-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  margin-bottom: 2rem;
+}
+
+.hm-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.hm-card h4 {
+  margin: 0;
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+
+.hm-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.figure-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.btn-link {
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.btn-link:hover {
+  color: var(--accent2);
+}
+
+tbody tr.active-row td {
+  background: rgba(126, 231, 135, 0.08);
+}
+
+.detail-panel {
+  margin-top: 2rem;
+  padding: 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.detail-panel h3 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
 }
 
 footer {

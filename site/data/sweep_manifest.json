@@ -1,0 +1,604 @@
+{
+  "depths": [
+    3
+  ],
+  "hiddens": [
+    56
+  ],
+  "scenarios": [
+    "annulus_disk",
+    "blobs_overlap",
+    "checkerboard",
+    "circles",
+    "circles_tight",
+    "far_blobs",
+    "gaussian_quantiles",
+    "linear_borderline",
+    "messy_blobs",
+    "moons_clean",
+    "moons_extra_noise",
+    "moons_hard",
+    "radial_waves",
+    "sign_product",
+    "sine_boundary",
+    "spiral",
+    "stripes_diagonal",
+    "swiss_roll_slice",
+    "xor_blobs"
+  ],
+  "epochs_default": 150,
+  "runs": [
+    {
+      "scenario": "annulus_disk",
+      "eml_params": 13161,
+      "mlp_params": 6609,
+      "depth": 3,
+      "hidden": 56,
+      "epochs": 150,
+      "eml_final_val_loss": 0.026714546605944633,
+      "mlp_final_val_loss": 0.6811973452568054,
+      "eml_final_val_acc": 0.9888888597488403,
+      "mlp_final_val_acc": 0.9833333492279053,
+      "val_loss_gap_mlp_minus_eml": 0.6544827986508608,
+      "rel_dir": "scenarios/annulus_disk/d3_h56",
+      "figures": {
+        "loss_linear": "scenarios/annulus_disk/d3_h56/loss_linear.png",
+        "loss_logy": "scenarios/annulus_disk/d3_h56/loss_logy.png",
+        "val_loss_gap": "scenarios/annulus_disk/d3_h56/val_loss_gap.png",
+        "val_delta_eml_minus_mlp": "scenarios/annulus_disk/d3_h56/val_delta_eml_minus_mlp.png",
+        "accuracy": "scenarios/annulus_disk/d3_h56/accuracy.png",
+        "grad_norm": "scenarios/annulus_disk/d3_h56/grad_norm.png",
+        "decision": "scenarios/annulus_disk/d3_h56/decision.png",
+        "summary_grid": "scenarios/annulus_disk/d3_h56/summary_grid.png",
+        "final_bars": "scenarios/annulus_disk/d3_h56/final_bars.png",
+        "histories": "scenarios/annulus_disk/d3_h56/histories.json"
+      }
+    },
+    {
+      "scenario": "blobs_overlap",
+      "eml_params": 13161,
+      "mlp_params": 6609,
+      "depth": 3,
+      "hidden": 56,
+      "epochs": 150,
+      "eml_final_val_loss": 0.67606121301651,
+      "mlp_final_val_loss": 0.6593002080917358,
+      "eml_final_val_acc": 0.574999988079071,
+      "mlp_final_val_acc": 0.762499988079071,
+      "val_loss_gap_mlp_minus_eml": -0.01676100492477417,
+      "rel_dir": "scenarios/blobs_overlap/d3_h56",
+      "figures": {
+        "loss_linear": "scenarios/blobs_overlap/d3_h56/loss_linear.png",
+        "loss_logy": "scenarios/blobs_overlap/d3_h56/loss_logy.png",
+        "val_loss_gap": "scenarios/blobs_overlap/d3_h56/val_loss_gap.png",
+        "val_delta_eml_minus_mlp": "scenarios/blobs_overlap/d3_h56/val_delta_eml_minus_mlp.png",
+        "accuracy": "scenarios/blobs_overlap/d3_h56/accuracy.png",
+        "grad_norm": "scenarios/blobs_overlap/d3_h56/grad_norm.png",
+        "decision": "scenarios/blobs_overlap/d3_h56/decision.png",
+        "summary_grid": "scenarios/blobs_overlap/d3_h56/summary_grid.png",
+        "final_bars": "scenarios/blobs_overlap/d3_h56/final_bars.png",
+        "histories": "scenarios/blobs_overlap/d3_h56/histories.json"
+      }
+    },
+    {
+      "scenario": "checkerboard",
+      "eml_params": 13161,
+      "mlp_params": 6609,
+      "depth": 3,
+      "hidden": 56,
+      "epochs": 150,
+      "eml_final_val_loss": 0.6830670237541199,
+      "mlp_final_val_loss": 0.6908579468727112,
+      "eml_final_val_acc": 0.5674999952316284,
+      "mlp_final_val_acc": 0.512499988079071,
+      "val_loss_gap_mlp_minus_eml": 0.007790923118591309,
+      "rel_dir": "scenarios/checkerboard/d3_h56",
+      "figures": {
+        "loss_linear": "scenarios/checkerboard/d3_h56/loss_linear.png",
+        "loss_logy": "scenarios/checkerboard/d3_h56/loss_logy.png",
+        "val_loss_gap": "scenarios/checkerboard/d3_h56/val_loss_gap.png",
+        "val_delta_eml_minus_mlp": "scenarios/checkerboard/d3_h56/val_delta_eml_minus_mlp.png",
+        "accuracy": "scenarios/checkerboard/d3_h56/accuracy.png",
+        "grad_norm": "scenarios/checkerboard/d3_h56/grad_norm.png",
+        "decision": "scenarios/checkerboard/d3_h56/decision.png",
+        "summary_grid": "scenarios/checkerboard/d3_h56/summary_grid.png",
+        "final_bars": "scenarios/checkerboard/d3_h56/final_bars.png",
+        "histories": "scenarios/checkerboard/d3_h56/histories.json"
+      }
+    },
+    {
+      "scenario": "circles",
+      "eml_params": 13161,
+      "mlp_params": 6609,
+      "depth": 3,
+      "hidden": 56,
+      "epochs": 150,
+      "eml_final_val_loss": 0.022256650030612946,
+      "mlp_final_val_loss": 0.6834897994995117,
+      "eml_final_val_acc": 0.9916666746139526,
+      "mlp_final_val_acc": 0.9958333373069763,
+      "val_loss_gap_mlp_minus_eml": 0.6612331494688988,
+      "rel_dir": "scenarios/circles/d3_h56",
+      "figures": {
+        "loss_linear": "scenarios/circles/d3_h56/loss_linear.png",
+        "loss_logy": "scenarios/circles/d3_h56/loss_logy.png",
+        "val_loss_gap": "scenarios/circles/d3_h56/val_loss_gap.png",
+        "val_delta_eml_minus_mlp": "scenarios/circles/d3_h56/val_delta_eml_minus_mlp.png",
+        "accuracy": "scenarios/circles/d3_h56/accuracy.png",
+        "grad_norm": "scenarios/circles/d3_h56/grad_norm.png",
+        "decision": "scenarios/circles/d3_h56/decision.png",
+        "summary_grid": "scenarios/circles/d3_h56/summary_grid.png",
+        "final_bars": "scenarios/circles/d3_h56/final_bars.png",
+        "histories": "scenarios/circles/d3_h56/histories.json"
+      }
+    },
+    {
+      "scenario": "circles_tight",
+      "eml_params": 13161,
+      "mlp_params": 6609,
+      "depth": 3,
+      "hidden": 56,
+      "epochs": 150,
+      "eml_final_val_loss": 1.0490417707842425e-06,
+      "mlp_final_val_loss": 0.6756290793418884,
+      "eml_final_val_acc": 1.0,
+      "mlp_final_val_acc": 1.0,
+      "val_loss_gap_mlp_minus_eml": 0.6756280303001176,
+      "rel_dir": "scenarios/circles_tight/d3_h56",
+      "figures": {
+        "loss_linear": "scenarios/circles_tight/d3_h56/loss_linear.png",
+        "loss_logy": "scenarios/circles_tight/d3_h56/loss_logy.png",
+        "val_loss_gap": "scenarios/circles_tight/d3_h56/val_loss_gap.png",
+        "val_delta_eml_minus_mlp": "scenarios/circles_tight/d3_h56/val_delta_eml_minus_mlp.png",
+        "accuracy": "scenarios/circles_tight/d3_h56/accuracy.png",
+        "grad_norm": "scenarios/circles_tight/d3_h56/grad_norm.png",
+        "decision": "scenarios/circles_tight/d3_h56/decision.png",
+        "summary_grid": "scenarios/circles_tight/d3_h56/summary_grid.png",
+        "final_bars": "scenarios/circles_tight/d3_h56/final_bars.png",
+        "histories": "scenarios/circles_tight/d3_h56/histories.json"
+      }
+    },
+    {
+      "scenario": "far_blobs",
+      "eml_params": 13161,
+      "mlp_params": 6609,
+      "depth": 3,
+      "hidden": 56,
+      "epochs": 150,
+      "eml_final_val_loss": 0.47489944100379944,
+      "mlp_final_val_loss": 0.5940693616867065,
+      "eml_final_val_acc": 1.0,
+      "mlp_final_val_acc": 1.0,
+      "val_loss_gap_mlp_minus_eml": 0.1191699206829071,
+      "rel_dir": "scenarios/far_blobs/d3_h56",
+      "figures": {
+        "loss_linear": "scenarios/far_blobs/d3_h56/loss_linear.png",
+        "loss_logy": "scenarios/far_blobs/d3_h56/loss_logy.png",
+        "val_loss_gap": "scenarios/far_blobs/d3_h56/val_loss_gap.png",
+        "val_delta_eml_minus_mlp": "scenarios/far_blobs/d3_h56/val_delta_eml_minus_mlp.png",
+        "accuracy": "scenarios/far_blobs/d3_h56/accuracy.png",
+        "grad_norm": "scenarios/far_blobs/d3_h56/grad_norm.png",
+        "decision": "scenarios/far_blobs/d3_h56/decision.png",
+        "summary_grid": "scenarios/far_blobs/d3_h56/summary_grid.png",
+        "final_bars": "scenarios/far_blobs/d3_h56/final_bars.png",
+        "histories": "scenarios/far_blobs/d3_h56/histories.json"
+      }
+    },
+    {
+      "scenario": "gaussian_quantiles",
+      "eml_params": 13161,
+      "mlp_params": 6609,
+      "depth": 3,
+      "hidden": 56,
+      "epochs": 150,
+      "eml_final_val_loss": 0.13989214599132538,
+      "mlp_final_val_loss": 0.6760057210922241,
+      "eml_final_val_acc": 0.940625011920929,
+      "mlp_final_val_acc": 0.8968750238418579,
+      "val_loss_gap_mlp_minus_eml": 0.5361135751008987,
+      "rel_dir": "scenarios/gaussian_quantiles/d3_h56",
+      "figures": {
+        "loss_linear": "scenarios/gaussian_quantiles/d3_h56/loss_linear.png",
+        "loss_logy": "scenarios/gaussian_quantiles/d3_h56/loss_logy.png",
+        "val_loss_gap": "scenarios/gaussian_quantiles/d3_h56/val_loss_gap.png",
+        "val_delta_eml_minus_mlp": "scenarios/gaussian_quantiles/d3_h56/val_delta_eml_minus_mlp.png",
+        "accuracy": "scenarios/gaussian_quantiles/d3_h56/accuracy.png",
+        "grad_norm": "scenarios/gaussian_quantiles/d3_h56/grad_norm.png",
+        "decision": "scenarios/gaussian_quantiles/d3_h56/decision.png",
+        "summary_grid": "scenarios/gaussian_quantiles/d3_h56/summary_grid.png",
+        "final_bars": "scenarios/gaussian_quantiles/d3_h56/final_bars.png",
+        "histories": "scenarios/gaussian_quantiles/d3_h56/histories.json"
+      }
+    },
+    {
+      "scenario": "linear_borderline",
+      "eml_params": 13161,
+      "mlp_params": 6609,
+      "depth": 3,
+      "hidden": 56,
+      "epochs": 150,
+      "eml_final_val_loss": 0.38469842076301575,
+      "mlp_final_val_loss": 0.6584154963493347,
+      "eml_final_val_acc": 0.859375,
+      "mlp_final_val_acc": 0.846875011920929,
+      "val_loss_gap_mlp_minus_eml": 0.27371707558631897,
+      "rel_dir": "scenarios/linear_borderline/d3_h56",
+      "figures": {
+        "loss_linear": "scenarios/linear_borderline/d3_h56/loss_linear.png",
+        "loss_logy": "scenarios/linear_borderline/d3_h56/loss_logy.png",
+        "val_loss_gap": "scenarios/linear_borderline/d3_h56/val_loss_gap.png",
+        "val_delta_eml_minus_mlp": "scenarios/linear_borderline/d3_h56/val_delta_eml_minus_mlp.png",
+        "accuracy": "scenarios/linear_borderline/d3_h56/accuracy.png",
+        "grad_norm": "scenarios/linear_borderline/d3_h56/grad_norm.png",
+        "decision": "scenarios/linear_borderline/d3_h56/decision.png",
+        "summary_grid": "scenarios/linear_borderline/d3_h56/summary_grid.png",
+        "final_bars": "scenarios/linear_borderline/d3_h56/final_bars.png",
+        "histories": "scenarios/linear_borderline/d3_h56/histories.json"
+      }
+    },
+    {
+      "scenario": "messy_blobs",
+      "eml_params": 13161,
+      "mlp_params": 6609,
+      "depth": 3,
+      "hidden": 56,
+      "epochs": 150,
+      "eml_final_val_loss": 0.6549074649810791,
+      "mlp_final_val_loss": 0.6632459163665771,
+      "eml_final_val_acc": 0.6499999761581421,
+      "mlp_final_val_acc": 0.7892857193946838,
+      "val_loss_gap_mlp_minus_eml": 0.008338451385498047,
+      "rel_dir": "scenarios/messy_blobs/d3_h56",
+      "figures": {
+        "loss_linear": "scenarios/messy_blobs/d3_h56/loss_linear.png",
+        "loss_logy": "scenarios/messy_blobs/d3_h56/loss_logy.png",
+        "val_loss_gap": "scenarios/messy_blobs/d3_h56/val_loss_gap.png",
+        "val_delta_eml_minus_mlp": "scenarios/messy_blobs/d3_h56/val_delta_eml_minus_mlp.png",
+        "accuracy": "scenarios/messy_blobs/d3_h56/accuracy.png",
+        "grad_norm": "scenarios/messy_blobs/d3_h56/grad_norm.png",
+        "decision": "scenarios/messy_blobs/d3_h56/decision.png",
+        "summary_grid": "scenarios/messy_blobs/d3_h56/summary_grid.png",
+        "final_bars": "scenarios/messy_blobs/d3_h56/final_bars.png",
+        "histories": "scenarios/messy_blobs/d3_h56/histories.json"
+      }
+    },
+    {
+      "scenario": "moons_clean",
+      "eml_params": 13161,
+      "mlp_params": 6609,
+      "depth": 3,
+      "hidden": 56,
+      "epochs": 150,
+      "eml_final_val_loss": 0.43771815299987793,
+      "mlp_final_val_loss": 0.6627963185310364,
+      "eml_final_val_acc": 0.8600000143051147,
+      "mlp_final_val_acc": 0.8399999737739563,
+      "val_loss_gap_mlp_minus_eml": 0.22507816553115845,
+      "rel_dir": "scenarios/moons_clean/d3_h56",
+      "figures": {
+        "loss_linear": "scenarios/moons_clean/d3_h56/loss_linear.png",
+        "loss_logy": "scenarios/moons_clean/d3_h56/loss_logy.png",
+        "val_loss_gap": "scenarios/moons_clean/d3_h56/val_loss_gap.png",
+        "val_delta_eml_minus_mlp": "scenarios/moons_clean/d3_h56/val_delta_eml_minus_mlp.png",
+        "accuracy": "scenarios/moons_clean/d3_h56/accuracy.png",
+        "grad_norm": "scenarios/moons_clean/d3_h56/grad_norm.png",
+        "decision": "scenarios/moons_clean/d3_h56/decision.png",
+        "summary_grid": "scenarios/moons_clean/d3_h56/summary_grid.png",
+        "final_bars": "scenarios/moons_clean/d3_h56/final_bars.png",
+        "histories": "scenarios/moons_clean/d3_h56/histories.json"
+      }
+    },
+    {
+      "scenario": "moons_extra_noise",
+      "eml_params": 13161,
+      "mlp_params": 6609,
+      "depth": 3,
+      "hidden": 56,
+      "epochs": 150,
+      "eml_final_val_loss": 0.5441589951515198,
+      "mlp_final_val_loss": 0.6661615967750549,
+      "eml_final_val_acc": 0.8071428537368774,
+      "mlp_final_val_acc": 0.8035714030265808,
+      "val_loss_gap_mlp_minus_eml": 0.12200260162353516,
+      "rel_dir": "scenarios/moons_extra_noise/d3_h56",
+      "figures": {
+        "loss_linear": "scenarios/moons_extra_noise/d3_h56/loss_linear.png",
+        "loss_logy": "scenarios/moons_extra_noise/d3_h56/loss_logy.png",
+        "val_loss_gap": "scenarios/moons_extra_noise/d3_h56/val_loss_gap.png",
+        "val_delta_eml_minus_mlp": "scenarios/moons_extra_noise/d3_h56/val_delta_eml_minus_mlp.png",
+        "accuracy": "scenarios/moons_extra_noise/d3_h56/accuracy.png",
+        "grad_norm": "scenarios/moons_extra_noise/d3_h56/grad_norm.png",
+        "decision": "scenarios/moons_extra_noise/d3_h56/decision.png",
+        "summary_grid": "scenarios/moons_extra_noise/d3_h56/summary_grid.png",
+        "final_bars": "scenarios/moons_extra_noise/d3_h56/final_bars.png",
+        "histories": "scenarios/moons_extra_noise/d3_h56/histories.json"
+      }
+    },
+    {
+      "scenario": "moons_hard",
+      "eml_params": 13161,
+      "mlp_params": 6609,
+      "depth": 3,
+      "hidden": 56,
+      "epochs": 150,
+      "eml_final_val_loss": 0.424817830324173,
+      "mlp_final_val_loss": 0.662708580493927,
+      "eml_final_val_acc": 0.8083333373069763,
+      "mlp_final_val_acc": 0.8041666746139526,
+      "val_loss_gap_mlp_minus_eml": 0.23789075016975403,
+      "rel_dir": "scenarios/moons_hard/d3_h56",
+      "figures": {
+        "loss_linear": "scenarios/moons_hard/d3_h56/loss_linear.png",
+        "loss_logy": "scenarios/moons_hard/d3_h56/loss_logy.png",
+        "val_loss_gap": "scenarios/moons_hard/d3_h56/val_loss_gap.png",
+        "val_delta_eml_minus_mlp": "scenarios/moons_hard/d3_h56/val_delta_eml_minus_mlp.png",
+        "accuracy": "scenarios/moons_hard/d3_h56/accuracy.png",
+        "grad_norm": "scenarios/moons_hard/d3_h56/grad_norm.png",
+        "decision": "scenarios/moons_hard/d3_h56/decision.png",
+        "summary_grid": "scenarios/moons_hard/d3_h56/summary_grid.png",
+        "final_bars": "scenarios/moons_hard/d3_h56/final_bars.png",
+        "histories": "scenarios/moons_hard/d3_h56/histories.json"
+      }
+    },
+    {
+      "scenario": "radial_waves",
+      "eml_params": 13161,
+      "mlp_params": 6609,
+      "depth": 3,
+      "hidden": 56,
+      "epochs": 150,
+      "eml_final_val_loss": 0.6841468214988708,
+      "mlp_final_val_loss": 0.6854463815689087,
+      "eml_final_val_acc": 0.5674999952316284,
+      "mlp_final_val_acc": 0.5674999952316284,
+      "val_loss_gap_mlp_minus_eml": 0.0012995600700378418,
+      "rel_dir": "scenarios/radial_waves/d3_h56",
+      "figures": {
+        "loss_linear": "scenarios/radial_waves/d3_h56/loss_linear.png",
+        "loss_logy": "scenarios/radial_waves/d3_h56/loss_logy.png",
+        "val_loss_gap": "scenarios/radial_waves/d3_h56/val_loss_gap.png",
+        "val_delta_eml_minus_mlp": "scenarios/radial_waves/d3_h56/val_delta_eml_minus_mlp.png",
+        "accuracy": "scenarios/radial_waves/d3_h56/accuracy.png",
+        "grad_norm": "scenarios/radial_waves/d3_h56/grad_norm.png",
+        "decision": "scenarios/radial_waves/d3_h56/decision.png",
+        "summary_grid": "scenarios/radial_waves/d3_h56/summary_grid.png",
+        "final_bars": "scenarios/radial_waves/d3_h56/final_bars.png",
+        "histories": "scenarios/radial_waves/d3_h56/histories.json"
+      }
+    },
+    {
+      "scenario": "sign_product",
+      "eml_params": 13161,
+      "mlp_params": 6609,
+      "depth": 3,
+      "hidden": 56,
+      "epochs": 150,
+      "eml_final_val_loss": 0.15617844462394714,
+      "mlp_final_val_loss": 0.678212583065033,
+      "eml_final_val_acc": 0.9725000262260437,
+      "mlp_final_val_acc": 0.8774999976158142,
+      "val_loss_gap_mlp_minus_eml": 0.5220341384410858,
+      "rel_dir": "scenarios/sign_product/d3_h56",
+      "figures": {
+        "loss_linear": "scenarios/sign_product/d3_h56/loss_linear.png",
+        "loss_logy": "scenarios/sign_product/d3_h56/loss_logy.png",
+        "val_loss_gap": "scenarios/sign_product/d3_h56/val_loss_gap.png",
+        "val_delta_eml_minus_mlp": "scenarios/sign_product/d3_h56/val_delta_eml_minus_mlp.png",
+        "accuracy": "scenarios/sign_product/d3_h56/accuracy.png",
+        "grad_norm": "scenarios/sign_product/d3_h56/grad_norm.png",
+        "decision": "scenarios/sign_product/d3_h56/decision.png",
+        "summary_grid": "scenarios/sign_product/d3_h56/summary_grid.png",
+        "final_bars": "scenarios/sign_product/d3_h56/final_bars.png",
+        "histories": "scenarios/sign_product/d3_h56/histories.json"
+      }
+    },
+    {
+      "scenario": "sine_boundary",
+      "eml_params": 13161,
+      "mlp_params": 6609,
+      "depth": 3,
+      "hidden": 56,
+      "epochs": 150,
+      "eml_final_val_loss": 0.6595327854156494,
+      "mlp_final_val_loss": 0.6743148565292358,
+      "eml_final_val_acc": 0.7300000190734863,
+      "mlp_final_val_acc": 0.75,
+      "val_loss_gap_mlp_minus_eml": 0.014782071113586426,
+      "rel_dir": "scenarios/sine_boundary/d3_h56",
+      "figures": {
+        "loss_linear": "scenarios/sine_boundary/d3_h56/loss_linear.png",
+        "loss_logy": "scenarios/sine_boundary/d3_h56/loss_logy.png",
+        "val_loss_gap": "scenarios/sine_boundary/d3_h56/val_loss_gap.png",
+        "val_delta_eml_minus_mlp": "scenarios/sine_boundary/d3_h56/val_delta_eml_minus_mlp.png",
+        "accuracy": "scenarios/sine_boundary/d3_h56/accuracy.png",
+        "grad_norm": "scenarios/sine_boundary/d3_h56/grad_norm.png",
+        "decision": "scenarios/sine_boundary/d3_h56/decision.png",
+        "summary_grid": "scenarios/sine_boundary/d3_h56/summary_grid.png",
+        "final_bars": "scenarios/sine_boundary/d3_h56/final_bars.png",
+        "histories": "scenarios/sine_boundary/d3_h56/histories.json"
+      }
+    },
+    {
+      "scenario": "spiral",
+      "eml_params": 13161,
+      "mlp_params": 6609,
+      "depth": 3,
+      "hidden": 56,
+      "epochs": 150,
+      "eml_final_val_loss": 0.6938206553459167,
+      "mlp_final_val_loss": 0.6965633630752563,
+      "eml_final_val_acc": 0.5,
+      "mlp_final_val_acc": 0.44062501192092896,
+      "val_loss_gap_mlp_minus_eml": 0.0027427077293395996,
+      "rel_dir": "scenarios/spiral/d3_h56",
+      "figures": {
+        "loss_linear": "scenarios/spiral/d3_h56/loss_linear.png",
+        "loss_logy": "scenarios/spiral/d3_h56/loss_logy.png",
+        "val_loss_gap": "scenarios/spiral/d3_h56/val_loss_gap.png",
+        "val_delta_eml_minus_mlp": "scenarios/spiral/d3_h56/val_delta_eml_minus_mlp.png",
+        "accuracy": "scenarios/spiral/d3_h56/accuracy.png",
+        "grad_norm": "scenarios/spiral/d3_h56/grad_norm.png",
+        "decision": "scenarios/spiral/d3_h56/decision.png",
+        "summary_grid": "scenarios/spiral/d3_h56/summary_grid.png",
+        "final_bars": "scenarios/spiral/d3_h56/final_bars.png",
+        "histories": "scenarios/spiral/d3_h56/histories.json"
+      }
+    },
+    {
+      "scenario": "stripes_diagonal",
+      "eml_params": 13161,
+      "mlp_params": 6609,
+      "depth": 3,
+      "hidden": 56,
+      "epochs": 150,
+      "eml_final_val_loss": 0.6932522058486938,
+      "mlp_final_val_loss": 0.6928361654281616,
+      "eml_final_val_acc": 0.5099999904632568,
+      "mlp_final_val_acc": 0.5274999737739563,
+      "val_loss_gap_mlp_minus_eml": -0.00041604042053222656,
+      "rel_dir": "scenarios/stripes_diagonal/d3_h56",
+      "figures": {
+        "loss_linear": "scenarios/stripes_diagonal/d3_h56/loss_linear.png",
+        "loss_logy": "scenarios/stripes_diagonal/d3_h56/loss_logy.png",
+        "val_loss_gap": "scenarios/stripes_diagonal/d3_h56/val_loss_gap.png",
+        "val_delta_eml_minus_mlp": "scenarios/stripes_diagonal/d3_h56/val_delta_eml_minus_mlp.png",
+        "accuracy": "scenarios/stripes_diagonal/d3_h56/accuracy.png",
+        "grad_norm": "scenarios/stripes_diagonal/d3_h56/grad_norm.png",
+        "decision": "scenarios/stripes_diagonal/d3_h56/decision.png",
+        "summary_grid": "scenarios/stripes_diagonal/d3_h56/summary_grid.png",
+        "final_bars": "scenarios/stripes_diagonal/d3_h56/final_bars.png",
+        "histories": "scenarios/stripes_diagonal/d3_h56/histories.json"
+      }
+    },
+    {
+      "scenario": "swiss_roll_slice",
+      "eml_params": 13161,
+      "mlp_params": 6609,
+      "depth": 3,
+      "hidden": 56,
+      "epochs": 150,
+      "eml_final_val_loss": 0.5098727345466614,
+      "mlp_final_val_loss": 0.6064325571060181,
+      "eml_final_val_acc": 0.875,
+      "mlp_final_val_acc": 0.6700000166893005,
+      "val_loss_gap_mlp_minus_eml": 0.09655982255935669,
+      "rel_dir": "scenarios/swiss_roll_slice/d3_h56",
+      "figures": {
+        "loss_linear": "scenarios/swiss_roll_slice/d3_h56/loss_linear.png",
+        "loss_logy": "scenarios/swiss_roll_slice/d3_h56/loss_logy.png",
+        "val_loss_gap": "scenarios/swiss_roll_slice/d3_h56/val_loss_gap.png",
+        "val_delta_eml_minus_mlp": "scenarios/swiss_roll_slice/d3_h56/val_delta_eml_minus_mlp.png",
+        "accuracy": "scenarios/swiss_roll_slice/d3_h56/accuracy.png",
+        "grad_norm": "scenarios/swiss_roll_slice/d3_h56/grad_norm.png",
+        "decision": "scenarios/swiss_roll_slice/d3_h56/decision.png",
+        "summary_grid": "scenarios/swiss_roll_slice/d3_h56/summary_grid.png",
+        "final_bars": "scenarios/swiss_roll_slice/d3_h56/final_bars.png",
+        "histories": "scenarios/swiss_roll_slice/d3_h56/histories.json"
+      }
+    },
+    {
+      "scenario": "xor_blobs",
+      "eml_params": 13161,
+      "mlp_params": 6609,
+      "depth": 3,
+      "hidden": 56,
+      "epochs": 150,
+      "eml_final_val_loss": 0.08085543662309647,
+      "mlp_final_val_loss": 0.6823943257331848,
+      "eml_final_val_acc": 0.9781249761581421,
+      "mlp_final_val_acc": 1.0,
+      "val_loss_gap_mlp_minus_eml": 0.6015388891100883,
+      "rel_dir": "scenarios/xor_blobs/d3_h56",
+      "figures": {
+        "loss_linear": "scenarios/xor_blobs/d3_h56/loss_linear.png",
+        "loss_logy": "scenarios/xor_blobs/d3_h56/loss_logy.png",
+        "val_loss_gap": "scenarios/xor_blobs/d3_h56/val_loss_gap.png",
+        "val_delta_eml_minus_mlp": "scenarios/xor_blobs/d3_h56/val_delta_eml_minus_mlp.png",
+        "accuracy": "scenarios/xor_blobs/d3_h56/accuracy.png",
+        "grad_norm": "scenarios/xor_blobs/d3_h56/grad_norm.png",
+        "decision": "scenarios/xor_blobs/d3_h56/decision.png",
+        "summary_grid": "scenarios/xor_blobs/d3_h56/summary_grid.png",
+        "final_bars": "scenarios/xor_blobs/d3_h56/final_bars.png",
+        "histories": "scenarios/xor_blobs/d3_h56/histories.json"
+      }
+    }
+  ],
+  "heatmaps": [
+    {
+      "scenario": "annulus_disk",
+      "path": "scenarios/annulus_disk/heatmap_val_loss_gap_mlp_minus_eml.png"
+    },
+    {
+      "scenario": "blobs_overlap",
+      "path": "scenarios/blobs_overlap/heatmap_val_loss_gap_mlp_minus_eml.png"
+    },
+    {
+      "scenario": "checkerboard",
+      "path": "scenarios/checkerboard/heatmap_val_loss_gap_mlp_minus_eml.png"
+    },
+    {
+      "scenario": "circles",
+      "path": "scenarios/circles/heatmap_val_loss_gap_mlp_minus_eml.png"
+    },
+    {
+      "scenario": "circles_tight",
+      "path": "scenarios/circles_tight/heatmap_val_loss_gap_mlp_minus_eml.png"
+    },
+    {
+      "scenario": "far_blobs",
+      "path": "scenarios/far_blobs/heatmap_val_loss_gap_mlp_minus_eml.png"
+    },
+    {
+      "scenario": "gaussian_quantiles",
+      "path": "scenarios/gaussian_quantiles/heatmap_val_loss_gap_mlp_minus_eml.png"
+    },
+    {
+      "scenario": "linear_borderline",
+      "path": "scenarios/linear_borderline/heatmap_val_loss_gap_mlp_minus_eml.png"
+    },
+    {
+      "scenario": "messy_blobs",
+      "path": "scenarios/messy_blobs/heatmap_val_loss_gap_mlp_minus_eml.png"
+    },
+    {
+      "scenario": "moons_clean",
+      "path": "scenarios/moons_clean/heatmap_val_loss_gap_mlp_minus_eml.png"
+    },
+    {
+      "scenario": "moons_extra_noise",
+      "path": "scenarios/moons_extra_noise/heatmap_val_loss_gap_mlp_minus_eml.png"
+    },
+    {
+      "scenario": "moons_hard",
+      "path": "scenarios/moons_hard/heatmap_val_loss_gap_mlp_minus_eml.png"
+    },
+    {
+      "scenario": "radial_waves",
+      "path": "scenarios/radial_waves/heatmap_val_loss_gap_mlp_minus_eml.png"
+    },
+    {
+      "scenario": "sign_product",
+      "path": "scenarios/sign_product/heatmap_val_loss_gap_mlp_minus_eml.png"
+    },
+    {
+      "scenario": "sine_boundary",
+      "path": "scenarios/sine_boundary/heatmap_val_loss_gap_mlp_minus_eml.png"
+    },
+    {
+      "scenario": "spiral",
+      "path": "scenarios/spiral/heatmap_val_loss_gap_mlp_minus_eml.png"
+    },
+    {
+      "scenario": "stripes_diagonal",
+      "path": "scenarios/stripes_diagonal/heatmap_val_loss_gap_mlp_minus_eml.png"
+    },
+    {
+      "scenario": "swiss_roll_slice",
+      "path": "scenarios/swiss_roll_slice/heatmap_val_loss_gap_mlp_minus_eml.png"
+    },
+    {
+      "scenario": "xor_blobs",
+      "path": "scenarios/xor_blobs/heatmap_val_loss_gap_mlp_minus_eml.png"
+    }
+  ]
+}

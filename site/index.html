@@ -11,19 +11,75 @@
       <h1>EMLnet benchmark results</h1>
       <p>
         Stabilized EML (<code>exp</code> − <code>log</code>) with custom autograd vs ReLU MLP on 2D toy
-        datasets. Table and figures from one training sweep (see run config in the table).
+        datasets. This page loads a <strong>sweep manifest</strong> when present; otherwise it falls back
+        to the single-configuration <code>results.json</code> bundle.
       </p>
     </header>
 
     <nav>
-      <a href="#summary">Summary table</a>
-      <a href="#featured">Featured scenarios</a>
-      <a href="#gallery">All scenarios</a>
+      <a href="#sweep-explorer" id="nav-sweep-link" hidden>Sweep / grid results</a>
+      <a href="#legacy-summary" id="nav-legacy-link">Single-run summary</a>
+      <a href="#featured">Featured</a>
+      <a href="#gallery">Gallery (legacy)</a>
       <a href="#deploy">Deploy</a>
     </nav>
 
-    <main>
-      <section id="summary">
+    <p class="banner" id="mode-banner" aria-live="polite"></p>
+
+    <main id="sweep-main" hidden>
+      <section id="sweep-explorer">
+        <h2>Sweep explorer</h2>
+        <div class="card">
+          <p>
+            <strong>Gap</strong> = MLP val BCE − EML val BCE. Positive ⇒ EML lower validation loss. Filters
+            apply to the table and heatmap panel.
+          </p>
+        </div>
+        <div class="filters">
+          <label>
+            Scenario
+            <select id="sw-scenario"></select>
+          </label>
+          <label>
+            Depth
+            <select id="sw-depth"></select>
+          </label>
+          <label>
+            Hidden
+            <select id="sw-hidden"></select>
+          </label>
+        </div>
+
+        <h3 class="subhead">Heatmaps (grid search)</h3>
+        <div class="heatmap-grid" id="sw-heatmaps"></div>
+
+        <h3 class="subhead">Runs</h3>
+        <div class="table-wrap">
+          <table id="sw-table">
+            <thead>
+              <tr>
+                <th>Scenario</th>
+                <th class="num">Depth</th>
+                <th class="num">Hidden</th>
+                <th class="num">Epochs</th>
+                <th class="num">EML val loss</th>
+                <th class="num">MLP val loss</th>
+                <th class="num">Gap</th>
+                <th class="num">EML val acc</th>
+                <th class="num">MLP val acc</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div id="sw-detail" class="detail-panel" hidden></div>
+      </section>
+    </main>
+
+    <main id="legacy-main">
+      <section id="legacy-summary">
         <h2>Validation summary</h2>
         <div class="card">
           <p>
@@ -83,8 +139,11 @@
       </section>
 
       <section id="gallery">
-        <h2>All scenarios</h2>
-        <p class="note">Each card loads <code>assets/&lt;scenario&gt;_decision.png</code> and <code>_loss.png</code> produced by <code>train_benchmarks</code> (naming <code>d3_h56_*</code> flattened at site build).</p>
+        <h2>All scenarios (legacy assets)</h2>
+        <p class="note">
+          Each card loads <code>assets/&lt;scenario&gt;_decision.png</code> and <code>_loss.png</code> from the
+          flattened single-run site build.
+        </p>
         <div class="grid cols-2" id="gallery-grid"></div>
       </section>
 
@@ -102,9 +161,10 @@
             then open <code>http://localhost:8080</code>
           </p>
           <p class="note">
-            Regenerate assets by re-running benchmarks from the <code>EMLnet/</code> package root, then
-            re-copy PNGs and <code>summary.json</code> into <code>site/assets</code> and <code>site/data/</code>
-            (see <code>site/README.md</code>).
+            <strong>Sweep:</strong> run <code>python -m emlnet_pkg.train_sweep</code> from <code>EMLnet/</code>,
+            then <code>python -m emlnet_pkg.build_sweep_site</code> to copy <code>plots/sweep/</code> into
+            <code>site/sweep/</code> and install <code>data/sweep_manifest.json</code>. The site prefers that
+            manifest when present.
           </p>
         </div>
       </section>
@@ -114,94 +174,6 @@
       EMLnet — PyTorch EML vs MLP toy benchmarks. Source repo README for methodology.
     </footer>
 
-    <script>
-      (function () {
-        const tbody = document.querySelector("#results-table tbody");
-        const status = document.getElementById("load-status");
-        const gallery = document.getElementById("gallery-grid");
-
-        function fmt4(x) {
-          if (typeof x !== "number" || Number.isNaN(x)) return "";
-          return x.toFixed(4);
-        }
-
-        function gapClass(g) {
-          if (g > 0.0005) return "pos";
-          if (g < -0.0005) return "neg";
-          return "";
-        }
-
-        function render(rows) {
-          rows.sort((a, b) => b.val_loss_gap_mlp_minus_eml - a.val_loss_gap_mlp_minus_eml);
-          tbody.innerHTML = "";
-          rows.forEach((r) => {
-            const tr = document.createElement("tr");
-            const g = r.val_loss_gap_mlp_minus_eml;
-            tr.innerHTML =
-              "<td><strong>" +
-              r.scenario +
-              "</strong></td>" +
-              '<td class="num">' +
-              r.epochs +
-              "</td>" +
-              '<td class="num">' +
-              r.depth +
-              "</td>" +
-              '<td class="num">' +
-              r.hidden +
-              "</td>" +
-              '<td class="num">' +
-              fmt4(r.eml_final_val_loss) +
-              "</td>" +
-              '<td class="num">' +
-              fmt4(r.mlp_final_val_loss) +
-              "</td>" +
-              '<td class="num ' +
-              gapClass(g) +
-              '">' +
-              fmt4(g) +
-              "</td>" +
-              '<td class="num">' +
-              fmt4(r.eml_final_val_acc) +
-              "</td>" +
-              '<td class="num">' +
-              fmt4(r.mlp_final_val_acc) +
-              "</td>";
-            tbody.appendChild(tr);
-          });
-
-          gallery.innerHTML = "";
-          rows.forEach((r) => {
-            const name = r.scenario;
-            const wrap = document.createElement("div");
-            wrap.innerHTML =
-              '<div class="figure"><h3>' +
-              name +
-              ' — decision</h3><img src="assets/' +
-              name +
-              '_decision.png" alt="" loading="lazy" /></div>' +
-              '<div class="figure" style="margin-top:0.75rem"><h3>' +
-              name +
-              ' — loss</h3><img src="assets/' +
-              name +
-              '_loss.png" alt="" loading="lazy" /></div>';
-            gallery.appendChild(wrap);
-          });
-
-          status.textContent =
-            "Loaded " + rows.length + " scenarios (EML " + rows[0].eml_params + " vs MLP " + rows[0].mlp_params + " params).";
-        }
-
-        fetch("data/results.json")
-          .then((r) => {
-            if (!r.ok) throw new Error(r.statusText);
-            return r.json();
-          })
-          .then(render)
-          .catch((e) => {
-            status.textContent = "Could not load data/results.json — use a local web server (see Deploy). " + e;
-          });
-      })();
-    </script>
+    <script src="app.js"></script>
   </body>
 </html>

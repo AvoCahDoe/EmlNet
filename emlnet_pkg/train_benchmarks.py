@@ -8,168 +8,20 @@ import json
 import logging
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import numpy as np
 import torch
-import torch.nn as nn
 from sklearn.model_selection import train_test_split
 
+from emlnet_pkg.benchmark_reporting import save_run_figure_bundle
 from emlnet_pkg.datasets_scenarios import SCENARIOS, load_scenario
 from emlnet_pkg.eml_function import EMLFunctionConfig
 from emlnet_pkg.init_utils import init_weights_small_
 from emlnet_pkg.models import DeepEMLClassifier, DeepMLPClassifier, count_params
-from emlnet_pkg.plotting import ensure_plots_dir, save_current_figure
-from emlnet_pkg.training_core import RunHistory, sanity_forward, train_one
+from emlnet_pkg.plotting import ensure_plots_dir
+from emlnet_pkg.training_core import sanity_forward, train_one
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
-
-
-def _mesh_probs(model: nn.Module, lim: float, n: int = 220) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    gx = np.linspace(-lim, lim, n, dtype=np.float32)
-    gy = np.linspace(-lim, lim, n, dtype=np.float32)
-    xx, yy = np.meshgrid(gx, gy)
-    grid = np.stack([xx.ravel(), yy.ravel()], axis=1)
-    t = torch.tensor(grid)
-    model.eval()
-    with torch.no_grad():
-        z = torch.sigmoid(model(t)).numpy().reshape(xx.shape)
-    return xx, yy, z
-
-
-def _plot_losses(h_eml: RunHistory, h_mlp: RunHistory, path: Path, title: str, logy: bool) -> None:
-    epochs = np.arange(1, len(h_eml.train_loss) + 1)
-    plt.figure(figsize=(9, 5))
-    plt.plot(epochs, h_eml.train_loss, label="EML train", linewidth=1.1)
-    plt.plot(epochs, h_eml.val_loss, label="EML val", linewidth=1.1)
-    plt.plot(epochs, h_mlp.train_loss, label="MLP train", linewidth=1.1)
-    plt.plot(epochs, h_mlp.val_loss, label="MLP val", linewidth=1.1)
-    plt.xlabel("Epoch")
-    plt.ylabel("BCE loss")
-    plt.title(title)
-    plt.legend(loc="best", fontsize=8)
-    plt.grid(True, alpha=0.3)
-    if logy:
-        plt.yscale("log")
-    save_current_figure(path)
-
-
-def _plot_val_gap(h_eml: RunHistory, h_mlp: RunHistory, path: Path, title: str) -> None:
-    epochs = np.arange(1, len(h_eml.val_loss) + 1)
-    gap = np.array(h_mlp.val_loss) - np.array(h_eml.val_loss)
-    plt.figure(figsize=(9, 4.5))
-    plt.plot(epochs, gap, color="tab:purple", linewidth=1.2)
-    plt.axhline(0.0, color="k", linewidth=0.8, linestyle="--")
-    plt.xlabel("Epoch")
-    plt.ylabel("MLP val BCE − EML val BCE")
-    plt.title(title + " (positive ⇒ EML lower val loss)")
-    plt.grid(True, alpha=0.3)
-    save_current_figure(path)
-
-
-def _plot_accuracy(h_eml: RunHistory, h_mlp: RunHistory, path: Path, title: str) -> None:
-    epochs = np.arange(1, len(h_eml.train_acc) + 1)
-    plt.figure(figsize=(9, 5))
-    plt.plot(epochs, h_eml.train_acc, label="EML train", linewidth=1.1)
-    plt.plot(epochs, h_eml.val_acc, label="EML val", linewidth=1.1)
-    plt.plot(epochs, h_mlp.train_acc, label="MLP train", linewidth=1.1)
-    plt.plot(epochs, h_mlp.val_acc, label="MLP val", linewidth=1.1)
-    plt.xlabel("Epoch")
-    plt.ylabel("Accuracy")
-    plt.ylim(-0.02, 1.02)
-    plt.title(title)
-    plt.legend(loc="best", fontsize=8)
-    plt.grid(True, alpha=0.3)
-    save_current_figure(path)
-
-
-def _plot_grad_norms(h_eml: RunHistory, h_mlp: RunHistory, path: Path, title: str) -> None:
-    epochs = np.arange(1, len(h_eml.grad_norm) + 1)
-    plt.figure(figsize=(9, 5))
-    plt.plot(epochs, h_eml.grad_norm, label="EML (post clip)", linewidth=1.0)
-    plt.plot(epochs, h_mlp.grad_norm, label="MLP (post clip)", linewidth=1.0)
-    plt.xlabel("Epoch")
-    plt.ylabel("Global grad L2 norm")
-    plt.title(title)
-    plt.legend(loc="best", fontsize=8)
-    plt.grid(True, alpha=0.3)
-    save_current_figure(path)
-
-
-def _plot_decision_pair(
-    eml: nn.Module,
-    mlp: nn.Module,
-    x_np: np.ndarray,
-    y_np: np.ndarray,
-    lim: float,
-    path: Path,
-    suptitle: str,
-) -> None:
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4.2), sharex=True, sharey=True)
-    for ax, model, title in zip(axes, (eml, mlp), ("EML", "MLP"), strict=True):
-        xx, yy, z = _mesh_probs(model, lim=lim)
-        ax.contourf(xx, yy, z, levels=28, cmap="RdBu_r", alpha=0.92)
-        ax.scatter(x_np[:, 0], x_np[:, 1], c=y_np, s=10, cmap="Spectral", edgecolors="k", linewidths=0.15)
-        ax.set_title(title)
-        ax.set_xlabel("x1")
-        ax.set_ylabel("x2")
-        ax.set_xlim(-lim, lim)
-        ax.set_ylim(-lim, lim)
-    fig.suptitle(suptitle)
-    fig.tight_layout()
-    save_current_figure(path)
-
-
-def _plot_summary_grid(h_eml: RunHistory, h_mlp: RunHistory, path: Path, suptitle: str) -> None:
-    epochs = np.arange(1, len(h_eml.train_loss) + 1)
-    fig, axes = plt.subplots(2, 2, figsize=(11, 8))
-    ax = axes[0, 0]
-    ax.plot(epochs, h_eml.train_loss, label="EML tr")
-    ax.plot(epochs, h_eml.val_loss, label="EML val")
-    ax.plot(epochs, h_mlp.train_loss, label="MLP tr")
-    ax.plot(epochs, h_mlp.val_loss, label="MLP val")
-    ax.set_title("Loss (linear)")
-    ax.set_xlabel("Epoch")
-    ax.set_ylabel("BCE")
-    ax.legend(fontsize=7)
-    ax.grid(True, alpha=0.3)
-
-    ax = axes[0, 1]
-    ax.plot(epochs, h_eml.train_loss, label="EML tr")
-    ax.plot(epochs, h_eml.val_loss, label="EML val")
-    ax.plot(epochs, h_mlp.train_loss, label="MLP tr")
-    ax.plot(epochs, h_mlp.val_loss, label="MLP val")
-    ax.set_yscale("log")
-    ax.set_title("Loss (log y)")
-    ax.set_xlabel("Epoch")
-    ax.set_ylabel("BCE")
-    ax.legend(fontsize=7)
-    ax.grid(True, alpha=0.3)
-
-    ax = axes[1, 0]
-    ax.plot(epochs, h_eml.train_acc, label="EML tr")
-    ax.plot(epochs, h_eml.val_acc, label="EML val")
-    ax.plot(epochs, h_mlp.train_acc, label="MLP tr")
-    ax.plot(epochs, h_mlp.val_acc, label="MLP val")
-    ax.set_ylim(-0.02, 1.02)
-    ax.set_title("Accuracy")
-    ax.set_xlabel("Epoch")
-    ax.set_ylabel("Acc")
-    ax.legend(fontsize=7)
-    ax.grid(True, alpha=0.3)
-
-    ax = axes[1, 1]
-    ax.plot(epochs, h_eml.grad_norm, label="EML")
-    ax.plot(epochs, h_mlp.grad_norm, label="MLP")
-    ax.set_title("Grad norm (post clip)")
-    ax.set_xlabel("Epoch")
-    ax.set_ylabel("Norm")
-    ax.legend(fontsize=7)
-    ax.grid(True, alpha=0.3)
-
-    fig.suptitle(suptitle)
-    fig.tight_layout()
-    save_current_figure(path)
 
 
 def parse_args() -> argparse.Namespace:
@@ -229,7 +81,13 @@ def main() -> None:
         init_weights_small_(mlp, std=args.init_std, zero_bias=True)
 
         logger.info("=== Scenario %s | lim=%.3f ===", bundle.name, bundle.lim)
-        logger.info("EML params: %d | MLP params: %d | depth=%d hidden=%d", count_params(eml), count_params(mlp), args.depth, args.hidden)
+        logger.info(
+            "EML params: %d | MLP params: %d | depth=%d hidden=%d",
+            count_params(eml),
+            count_params(mlp),
+            args.depth,
+            args.hidden,
+        )
 
         x0 = x_train[: min(64, x_train.shape[0])]
         sanity_forward(eml, x0)
@@ -286,13 +144,18 @@ def main() -> None:
         out.mkdir(parents=True, exist_ok=True)
         tag = f"d{args.depth}_h{args.hidden}"
         title = f"{bundle.name} ({tag})"
-        _plot_losses(h_eml, h_mlp, out / f"{tag}_loss_linear.png", title, logy=False)
-        _plot_losses(h_eml, h_mlp, out / f"{tag}_loss_logy.png", title, logy=True)
-        _plot_val_gap(h_eml, h_mlp, out / f"{tag}_val_loss_gap.png", title)
-        _plot_accuracy(h_eml, h_mlp, out / f"{tag}_accuracy.png", title)
-        _plot_grad_norms(h_eml, h_mlp, out / f"{tag}_grad_norm.png", title)
-        _plot_decision_pair(eml, mlp, x_np, y_np, bundle.lim, out / f"{tag}_decision.png", title)
-        _plot_summary_grid(h_eml, h_mlp, out / f"{tag}_summary_grid.png", title)
+        save_run_figure_bundle(
+            out,
+            title,
+            eml,
+            mlp,
+            h_eml,
+            h_mlp,
+            x_np,
+            y_np,
+            bundle.lim,
+            prefix=f"{tag}_",
+        )
         logger.info("Wrote figures under %s", out)
 
     summary_path = base / "summary.json"

@@ -1,0 +1,5 @@
+{
+  "sweep_manifest_url": "data/sweep_manifest.json",
+  "sweep_summary_url": "data/sweep_summary_all.json",
+  "asset_base": "sweep"
+}
