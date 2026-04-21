@@ -2,7 +2,6 @@
 
 PyTorch implementation of a **stabilized EML (exp − log) layer** with a **custom `autograd.Function`**: clamped forward ($\exp(\mathrm{clamp}(x)) - \ln(|y|+\epsilon)$) and **clamped outgoing gradients** in the backward pass, plus training scripts that compare **EML stacks** to **ReLU MLPs** on 2D classification toy datasets.
 
-**Math in Markdown:** `$…$` inline, `$$…$$` display (GitHub / VS Code preview with math enabled).
 
 ---
 
@@ -84,16 +83,16 @@ EMLnet/
 
 **Stabilized forward** (used in code):
 
-$$
+```math
 f = \exp(x_c) - \ln(y_a), \quad x_c = \mathrm{clamp}(x),\quad y_a = |y| + \epsilon.
-$$
+```
 
 **Gradients** (before extra stabilization):
 
-$$
+```math
 \frac{\partial f}{\partial x_c} = \exp(x_c), \qquad
 \frac{\partial f}{\partial y_a} = -\frac{1}{y_a}.
-$$
+```
 
 Chain rule through `clamp` uses the usual gate on $x$; through $|y|$ use $\operatorname{sign}(y)$. This repo **clips** the final `grad_x` and `grad_y` returned from [`EMLFunction.backward`](emlnet_pkg/eml_function.py) (configurable via `EMLFunctionConfig`) to limit explosion.
 
