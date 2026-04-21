@@ -109,6 +109,58 @@ EML stacks use **more parameters** than a width-matched MLP because each `EMLLay
 
 ---
 
+## Current benchmark results
+
+Latest full run (saved in [`plots/benchmarks/summary.json`](plots/benchmarks/summary.json)):
+
+```bash
+python -m emlnet_pkg.train_benchmarks --scenarios all --epochs 2000 --depth 3 --hidden 56
+```
+
+- Scenarios evaluated: **19**
+- Model sizes in this run: **EML 13,161 params** vs **MLP 6,609 params**
+- Metric: `val_loss_gap_mlp_minus_eml = MLP val BCE - EML val BCE`
+  - **Positive** gap: EML has lower validation loss
+  - **Negative** gap: MLP has lower validation loss
+
+Best EML-validation-loss gaps (positive):
+
+- `sine_boundary`: **+0.3848** (EML val loss 0.0928 vs MLP 0.4776)
+- `moons_clean`: **+0.1963** (EML val loss 0.00035 vs MLP 0.1967)
+- `spiral`: **+0.0312** (both weak in absolute terms; EML slightly better val loss)
+- `circles_tight`: **+0.00078** (both near-perfect)
+- `swiss_roll_slice`: **+0.00098** (both near-perfect)
+
+Largest MLP-validation-loss gaps (negative):
+
+- `radial_waves`: **-0.7388**
+- `sign_product`: **-0.3415**
+- `messy_blobs`: **-0.2437**
+- `checkerboard`: **-0.1525**
+- `moons_extra_noise`: **-0.1326**
+
+Interpretation:
+
+- EML is strong on some smooth/nonlinear boundaries (`sine_boundary`, `moons_clean`).
+- MLP is stronger on several noisy or pattern-heavy cases in this configuration.
+- This comparison is **not parameter-matched** (EML has ~2x parameters here); for fairer ablations, retune `--hidden` and/or depth per model family.
+
+### Sample figures
+
+**Decision boundaries**
+
+![Annulus Disk Decision](plots/benchmarks/annulus_disk/d3_h56_decision.png)
+![Moons Hard Decision](plots/benchmarks/moons_hard/d3_h56_decision.png)
+![Spiral Decision](plots/benchmarks/spiral/d3_h56_decision.png)
+
+**Training dynamics examples**
+
+![Moons Hard Loss Linear](plots/benchmarks/moons_hard/d3_h56_loss_linear.png)
+![Spiral Loss Linear](plots/benchmarks/spiral/d3_h56_loss_linear.png)
+![Checkerboard Loss Linear](plots/benchmarks/checkerboard/d3_h56_loss_linear.png)
+
+---
+
 ## Troubleshooting
 
 1. **NaNs in forward:** lower `--lr`, increase $\epsilon$, tighten $x$ clamp range in `EMLFunctionConfig`.
