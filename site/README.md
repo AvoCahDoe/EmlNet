@@ -1,6 +1,6 @@
 # EMLnet static results site
 
-Self-contained **HTML + CSS + assets** for deploying benchmark visuals and the numeric summary table.
+Self-contained **HTML + JS + assets** (Tailwind and Chart.js via CDN in `index.html`) for benchmark visuals and tables.
 
 ## Preview locally
 

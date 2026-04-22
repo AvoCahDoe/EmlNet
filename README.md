@@ -56,7 +56,7 @@ Scenario keys are defined in [`emlnet_pkg/datasets_scenarios.py`](emlnet_pkg/dat
 
 ### Static results site (HTML + CSS)
 
-A deployable bundle lives in [`site/`](site/): [`site/index.html`](site/index.html), [`site/styles.css`](site/styles.css), [`site/data/results.json`](site/data/results.json), and [`site/assets/`](site/assets/) (flattened PNGs per scenario). See [`site/README.md`](site/README.md) for preview and refresh commands.
+A deployable bundle lives in [`site/`](site/): [`site/index.html`](site/index.html) (Tailwind + Chart.js CDNs), [`site/app.js`](site/app.js), [`site/data/results.json`](site/data/results.json) / sweep JSON, and [`site/assets/`](site/assets/) (flattened PNGs per scenario). See [`site/README.md`](site/README.md) for preview and refresh commands.
 
 ```bash
 cd site && python -m http.server 8080
