@@ -13,3 +13,6 @@ build/
 
 # Regenerate with: python -m emlnet_pkg.train_sweep && python -m emlnet_pkg.build_sweep_site
 plots/sweep/
+
+# Local reference PDFs / papers (not part of the package)
+reference/

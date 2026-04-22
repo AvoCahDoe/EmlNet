@@ -47,6 +47,25 @@
       manifest.runs.length +
       " runs.";
 
+    const presetEl = $("#sw-preset-summary");
+    if (presetEl) {
+      const pr = manifest.preset != null ? String(manifest.preset) : "";
+      const ep = manifest.epochs_default != null ? String(manifest.epochs_default) : "";
+      presetEl.hidden = false;
+      presetEl.textContent =
+        "Grid " +
+        manifest.depths.length +
+        "×" +
+        manifest.hiddens.length +
+        " (depths [" +
+        manifest.depths.join(", ") +
+        "], hiddens [" +
+        manifest.hiddens.join(", ") +
+        "])" +
+        (ep ? " · epochs/run " + ep : "") +
+        (pr ? " · preset " + pr : "");
+    }
+
     const selScenario = $("#sw-scenario");
     const selDepth = $("#sw-depth");
     const selHidden = $("#sw-hidden");

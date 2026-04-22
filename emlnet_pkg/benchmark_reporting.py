@@ -7,6 +7,8 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import patheffects as pe
+from matplotlib.colors import TwoSlopeNorm
 import torch
 import torch.nn as nn
 
@@ -247,14 +249,48 @@ def plot_heatmap_gap(
     path: Path,
     title: str,
 ) -> None:
-    """matrix[i,j] = gap at depth[i], hidden[j]."""
-    plt.figure(figsize=(max(6, len(hiddens) * 1.2), max(4, len(depths) * 0.8)))
-    im = plt.imshow(matrix, aspect="auto", cmap="RdBu_r", origin="lower")
-    plt.colorbar(im, label="MLP val BCE − EML val BCE")
-    plt.xticks(np.arange(len(hiddens)), [str(h) for h in hiddens])
-    plt.yticks(np.arange(len(depths)), [str(d) for d in depths])
-    plt.xlabel("hidden width")
-    plt.ylabel("depth")
-    plt.title(title)
-    plt.tight_layout()
+    """matrix[i,j] = gap at depth[i], hidden[j] (rows = depth, cols = hidden).
+
+    Uses a diverging norm around 0. Matplotlib's default ``Normalize`` breaks when
+    ``vmin == vmax`` (e.g. a 1×1 sweep), which yields a blank / white heatmap cell.
+    """
+    mat = np.asarray(matrix, dtype=np.float64)
+    if not np.any(np.isfinite(mat)):
+        mat = np.zeros((len(depths), len(hiddens)), dtype=np.float64)
+
+    v = float(np.nanmax(np.abs(mat)))
+    if not np.isfinite(v) or v < 1e-12:
+        v = 1e-6
+    norm = TwoSlopeNorm(vmin=-v, vcenter=0.0, vmax=v)
+
+    fw = max(6.0, len(hiddens) * 1.15 + 2.5)
+    fh = max(4.0, len(depths) * 0.85 + 2.0)
+    fig, ax = plt.subplots(figsize=(fw, fh))
+    im = ax.imshow(
+        mat,
+        aspect="equal",
+        cmap="RdBu_r",
+        origin="lower",
+        norm=norm,
+        interpolation="nearest",
+    )
+    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="MLP val BCE − EML val BCE")
+    ax.set_xticks(np.arange(len(hiddens)))
+    ax.set_xticklabels([str(h) for h in hiddens])
+    ax.set_yticks(np.arange(len(depths)))
+    ax.set_yticklabels([str(d) for d in depths])
+    ax.set_xlabel("hidden width")
+    ax.set_ylabel("depth")
+    ax.set_title(title)
+
+    ncells = max(1, mat.shape[0] * mat.shape[1])
+    fs = max(5, min(11, 200 // ncells))
+    for i in range(mat.shape[0]):
+        for j in range(mat.shape[1]):
+            val = mat[i, j]
+            txt = "nan" if not np.isfinite(val) else f"{val:.3f}"
+            t = ax.text(j, i, txt, ha="center", va="center", fontsize=fs, color="white")
+            t.set_path_effects([pe.Stroke(linewidth=2.0, foreground="black"), pe.Normal()])
+
+    fig.tight_layout()
     save_current_figure(path)
