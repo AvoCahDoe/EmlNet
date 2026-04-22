@@ -14,16 +14,16 @@
         },
       };
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   </head>
   <body class="min-h-screen bg-zinc-50 text-zinc-900 antialiased font-sans text-[15px] leading-relaxed">
     <header class="border-b border-zinc-200/80 bg-white/90 backdrop-blur-sm sticky top-0 z-20">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 py-5">
         <h1 class="text-xl font-semibold tracking-tight text-zinc-900">EMLnet</h1>
         <p class="mt-1.5 text-sm text-zinc-500 max-w-2xl">
-          EML vs ReLU MLP on 2D benchmarks. Loads
-          <code class="text-xs bg-zinc-100 px-1 py-0.5 rounded">data/sweep_manifest.json</code> when present; otherwise
-          <code class="text-xs bg-zinc-100 px-1 py-0.5 rounded">data/results.json</code>.
+          EML vs ReLU MLP on 2D benchmarks. Sweep data loads from
+          <code class="text-xs bg-zinc-100 px-1 py-0.5 rounded">data/sweep_manifest.json</code>; otherwise
+          <code class="text-xs bg-zinc-100 px-1 py-0.5 rounded">data/results.json</code>. Charts load only after you
+          <strong class="font-medium text-zinc-700">Load results</strong> (faster first paint).
         </p>
       </div>
       <nav class="max-w-6xl mx-auto px-4 sm:px-6 pb-4 flex flex-wrap gap-x-5 gap-y-2 text-sm">
@@ -38,85 +38,114 @@
     <p id="mode-banner" class="text-center text-xs text-zinc-500 py-2 border-b border-zinc-100 bg-zinc-50/80" aria-live="polite"></p>
 
     <!-- Sweep -->
-    <main id="sweep-main" class="hidden max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-12">
+    <main id="sweep-main" class="hidden max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-10">
       <section id="sweep" class="scroll-mt-24 space-y-8">
         <div>
           <h2 class="text-lg font-medium text-zinc-800">Sweep</h2>
           <p class="mt-1 text-sm text-zinc-500">
-            Gap = MLP val BCE − EML val BCE. Positive ⇒ lower validation loss for EML.
+            Gap = MLP val BCE − EML val BCE (positive ⇒ EML wins on val loss). Pick a sample or set filters, then
+            <strong class="text-zinc-700">Load results</strong>.
           </p>
           <p id="sw-preset-summary" class="mt-2 text-xs text-zinc-500 hidden"></p>
         </div>
 
-        <div class="flex flex-wrap items-end gap-4 sm:gap-6">
-          <label class="block min-w-[10rem]">
-            <span class="block text-xs font-medium text-zinc-400 mb-1">Scenario</span>
-            <select id="sw-scenario" class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-300"></select>
-          </label>
-          <label class="block min-w-[8rem]">
-            <span class="block text-xs font-medium text-zinc-400 mb-1">Depth</span>
-            <select id="sw-depth" class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-300"></select>
-          </label>
-          <label class="block min-w-[8rem]">
-            <span class="block text-xs font-medium text-zinc-400 mb-1">Hidden</span>
-            <select id="sw-hidden" class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-300"></select>
-          </label>
+        <div>
+          <h3 class="text-xs font-medium uppercase tracking-wide text-zinc-400 mb-2">Samples</h3>
+          <p class="text-xs text-zinc-500 mb-3">One click sets scenario + mid grid (depth × hidden) and loads.</p>
+          <div id="sw-samples" class="flex flex-wrap gap-2"></div>
         </div>
 
-        <div>
-          <h3 class="text-sm font-medium text-zinc-600 mb-3">Gap overview</h3>
-          <div class="rounded-xl border border-zinc-200 bg-white p-4 sm:p-5 shadow-sm">
-            <div class="h-64 sm:h-80 w-full min-w-0">
-              <canvas id="sw-gap-chart"></canvas>
-            </div>
-            <p id="sw-chart-caption" class="mt-2 text-xs text-zinc-400"></p>
+        <div class="rounded-xl border border-zinc-200 bg-white p-4 sm:p-5 shadow-sm space-y-4">
+          <h3 class="text-xs font-medium uppercase tracking-wide text-zinc-400">Parameters</h3>
+          <div class="flex flex-wrap items-end gap-4 sm:gap-6">
+            <label class="block min-w-[11rem]">
+              <span class="block text-xs font-medium text-zinc-400 mb-1">Scenario</span>
+              <select id="sw-scenario" class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-300"></select>
+            </label>
+            <label class="block min-w-[8rem]">
+              <span class="block text-xs font-medium text-zinc-400 mb-1">Depth</span>
+              <select id="sw-depth" class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-300"></select>
+            </label>
+            <label class="block min-w-[8rem]">
+              <span class="block text-xs font-medium text-zinc-400 mb-1">Hidden</span>
+              <select id="sw-hidden" class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-300"></select>
+            </label>
+          </div>
+          <label class="flex items-center gap-2 text-sm text-zinc-600 cursor-pointer select-none">
+            <input type="checkbox" id="sw-all-heatmaps" class="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-300" />
+            <span>Load heatmaps for <em>all</em> scenarios (heavy — many images)</span>
+          </label>
+          <div class="flex flex-wrap items-center gap-3 pt-1">
+            <button
+              type="button"
+              id="sw-load-btn"
+              class="rounded-lg bg-zinc-900 text-white text-sm font-medium px-4 py-2 hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2"
+            >
+              Load results
+            </button>
+            <span id="sw-load-hint" class="text-xs text-zinc-400"></span>
           </div>
         </div>
 
-        <div>
-          <h3 class="text-sm font-medium text-zinc-600 mb-3">Heatmaps</h3>
-          <div id="sw-heatmaps" class="grid gap-6 sm:grid-cols-2"></div>
-        </div>
+        <div id="sw-results-panel" class="hidden space-y-10 border-t border-zinc-200 pt-10">
+          <div>
+            <h3 class="text-sm font-medium text-zinc-600 mb-3">Gap overview</h3>
+            <div class="rounded-xl border border-zinc-200 bg-white p-4 sm:p-5 shadow-sm">
+              <div class="h-56 sm:h-72 w-full min-w-0">
+                <canvas id="sw-gap-chart"></canvas>
+              </div>
+              <p id="sw-chart-caption" class="mt-2 text-xs text-zinc-400"></p>
+            </div>
+          </div>
 
-        <div>
-          <h3 class="text-sm font-medium text-zinc-600 mb-3">Runs</h3>
-          <div class="overflow-x-auto rounded-xl border border-zinc-200 bg-white shadow-sm">
-            <table id="sw-table" class="w-full text-sm text-left">
-              <thead class="text-xs uppercase tracking-wide text-zinc-400 border-b border-zinc-100 bg-zinc-50/80">
-                <tr>
-                  <th class="px-3 py-2.5 font-medium">Scenario</th>
-                  <th class="px-3 py-2.5 font-medium text-right">d</th>
-                  <th class="px-3 py-2.5 font-medium text-right">h</th>
-                  <th class="px-3 py-2.5 font-medium text-right">Ep</th>
-                  <th class="px-3 py-2.5 font-medium text-right">EML L</th>
-                  <th class="px-3 py-2.5 font-medium text-right">MLP L</th>
-                  <th class="px-3 py-2.5 font-medium text-right">Gap</th>
-                  <th class="px-3 py-2.5 font-medium text-right">Acc</th>
-                  <th class="px-3 py-2.5 font-medium w-24"></th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-zinc-100"></tbody>
-            </table>
+          <div>
+            <h3 class="text-sm font-medium text-zinc-600 mb-3">Heatmaps</h3>
+            <div id="sw-heatmaps" class="grid gap-6 sm:grid-cols-2"></div>
+          </div>
+
+          <div>
+            <h3 class="text-sm font-medium text-zinc-600 mb-3">Runs</h3>
+            <div class="overflow-x-auto rounded-xl border border-zinc-200 bg-white shadow-sm">
+              <table id="sw-table" class="w-full text-sm text-left">
+                <thead class="text-xs uppercase tracking-wide text-zinc-400 border-b border-zinc-100 bg-zinc-50/80">
+                  <tr>
+                    <th class="px-3 py-2.5 font-medium">Scenario</th>
+                    <th class="px-3 py-2.5 font-medium text-right">d</th>
+                    <th class="px-3 py-2.5 font-medium text-right">h</th>
+                    <th class="px-3 py-2.5 font-medium text-right">Ep</th>
+                    <th class="px-3 py-2.5 font-medium text-right">EML L</th>
+                    <th class="px-3 py-2.5 font-medium text-right">MLP L</th>
+                    <th class="px-3 py-2.5 font-medium text-right">Gap</th>
+                    <th class="px-3 py-2.5 font-medium text-right">Acc</th>
+                    <th class="px-3 py-2.5 font-medium w-24"></th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-100"></tbody>
+              </table>
+            </div>
           </div>
         </div>
 
         <div id="sw-detail" class="hidden space-y-6 border-t border-zinc-200 pt-10 scroll-mt-20">
           <div>
             <h3 id="sw-detail-title" class="text-base font-medium text-zinc-800"></h3>
-            <div class="mt-4 rounded-xl border border-zinc-200 bg-white p-4 h-72 sm:h-80">
+            <div class="mt-4 rounded-xl border border-zinc-200 bg-white p-4 h-64 sm:h-72">
               <canvas id="sw-detail-loss-chart"></canvas>
             </div>
-            <p class="mt-2 text-xs text-zinc-400">Validation BCE from saved histories (EML vs MLP).</p>
+            <p class="mt-2 text-xs text-zinc-400">Validation BCE from histories (EML vs MLP).</p>
           </div>
           <div id="sw-fig-grid" class="grid gap-4 sm:grid-cols-2"></div>
           <p class="text-xs text-zinc-400">
+            <button type="button" id="sw-detail-more-figs" class="text-zinc-700 underline underline-offset-2 hover:text-zinc-900">
+              Load all figure PNGs
+            </button>
+            ·
             <a id="sw-detail-histories-link" href="#" class="text-zinc-700 underline underline-offset-2 hover:text-zinc-900">histories.json</a>
           </p>
         </div>
       </section>
     </main>
 
-    <!-- Legacy summary only (hidden when sweep manifest loads) -->
     <div id="legacy-summary-wrap" class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
       <section id="legacy" class="scroll-mt-24 space-y-6">
         <div>
@@ -151,45 +180,48 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6 pb-16 space-y-16">
       <section id="featured" class="scroll-mt-24 space-y-6">
         <h2 class="text-lg font-medium text-zinc-800">Featured</h2>
+        <p class="text-xs text-zinc-500">Lazy-loaded images.</p>
         <div class="grid gap-6 sm:grid-cols-2">
           <figure class="rounded-xl border border-zinc-200 bg-white overflow-hidden shadow-sm">
             <figcaption class="text-xs text-zinc-500 px-3 py-2 border-b border-zinc-100">moons_hard — decision</figcaption>
-            <img src="assets/moons_hard_decision.png" alt="" class="w-full block bg-zinc-100" loading="lazy" />
+            <img src="assets/moons_hard_decision.png" alt="" class="w-full block bg-zinc-100" loading="lazy" decoding="async" />
           </figure>
           <figure class="rounded-xl border border-zinc-200 bg-white overflow-hidden shadow-sm">
             <figcaption class="text-xs text-zinc-500 px-3 py-2 border-b border-zinc-100">moons_hard — loss</figcaption>
-            <img src="assets/moons_hard_loss.png" alt="" class="w-full block bg-zinc-100" loading="lazy" />
+            <img src="assets/moons_hard_loss.png" alt="" class="w-full block bg-zinc-100" loading="lazy" decoding="async" />
           </figure>
           <figure class="rounded-xl border border-zinc-200 bg-white overflow-hidden shadow-sm">
             <figcaption class="text-xs text-zinc-500 px-3 py-2 border-b border-zinc-100">sine_boundary — decision</figcaption>
-            <img src="assets/sine_boundary_decision.png" alt="" class="w-full block bg-zinc-100" loading="lazy" />
+            <img src="assets/sine_boundary_decision.png" alt="" class="w-full block bg-zinc-100" loading="lazy" decoding="async" />
           </figure>
           <figure class="rounded-xl border border-zinc-200 bg-white overflow-hidden shadow-sm">
             <figcaption class="text-xs text-zinc-500 px-3 py-2 border-b border-zinc-100">sine_boundary — loss</figcaption>
-            <img src="assets/sine_boundary_loss.png" alt="" class="w-full block bg-zinc-100" loading="lazy" />
+            <img src="assets/sine_boundary_loss.png" alt="" class="w-full block bg-zinc-100" loading="lazy" decoding="async" />
           </figure>
           <figure class="rounded-xl border border-zinc-200 bg-white overflow-hidden shadow-sm">
             <figcaption class="text-xs text-zinc-500 px-3 py-2 border-b border-zinc-100">xor_blobs — decision</figcaption>
-            <img src="assets/xor_blobs_decision.png" alt="" class="w-full block bg-zinc-100" loading="lazy" />
+            <img src="assets/xor_blobs_decision.png" alt="" class="w-full block bg-zinc-100" loading="lazy" decoding="async" />
           </figure>
           <figure class="rounded-xl border border-zinc-200 bg-white overflow-hidden shadow-sm">
             <figcaption class="text-xs text-zinc-500 px-3 py-2 border-b border-zinc-100">xor_blobs — loss</figcaption>
-            <img src="assets/xor_blobs_loss.png" alt="" class="w-full block bg-zinc-100" loading="lazy" />
+            <img src="assets/xor_blobs_loss.png" alt="" class="w-full block bg-zinc-100" loading="lazy" decoding="async" />
           </figure>
         </div>
       </section>
 
       <section id="gallery" class="scroll-mt-24 space-y-6">
         <h2 class="text-lg font-medium text-zinc-800">Gallery</h2>
-        <p class="text-sm text-zinc-500">Assets from the single-run site build.</p>
-        <div id="gallery-grid" class="grid gap-6 sm:grid-cols-2"></div>
+        <p id="gallery-blurb" class="text-sm text-zinc-500">
+          Thumbnails from the sweep (decision map) or legacy assets — filled after data loads.
+        </p>
+        <div id="gallery-grid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
       </section>
 
       <section id="deploy" class="scroll-mt-24">
         <h2 class="text-lg font-medium text-zinc-800 mb-3">Deploy</h2>
         <p class="text-sm text-zinc-600 max-w-xl">
-          Static files: publish <code class="text-xs bg-zinc-100 px-1 rounded">site/</code>. Preview with
-          <code class="text-xs bg-zinc-100 px-1 rounded">cd site && python -m http.server 8080</code>. Regenerate sweep with
+          Static <code class="text-xs bg-zinc-100 px-1 rounded">site/</code>. Preview:
+          <code class="text-xs bg-zinc-100 px-1 rounded">cd site && python -m http.server 8080</code>. Rebuild sweep bundle:
           <code class="text-xs bg-zinc-100 px-1 rounded">python -m emlnet_pkg.build_sweep_site --clean</code>.
         </p>
       </section>
