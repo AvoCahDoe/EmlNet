@@ -125,11 +125,11 @@ export function RunDetailModal({ run, onClose }: Props) {
 
   const figKeys = pngFigureKeys(run, loadAllFigs);
   const compactOnly = pngFigureKeys(run, false);
-  const extraCount = pngFigureKeys(run, true).length - compactOnly.length;
+  const extraCount = Math.max(0, pngFigureKeys(run, true).length - compactOnly.length);
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-zinc-950/40 p-4 sm:items-center"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-zinc-950/35 p-4 backdrop-blur-[2px] transition-opacity duration-200 ease-out sm:items-center"
       role="dialog"
       aria-modal="true"
       aria-labelledby="run-detail-title"
@@ -137,7 +137,7 @@ export function RunDetailModal({ run, onClose }: Props) {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-xl">
+      <div className="max-h-[90vh] w-full max-w-3xl origin-bottom overflow-y-auto rounded-2xl border border-zinc-200/90 bg-white shadow-2xl transition-all duration-300 ease-out sm:origin-center">
         <div className="sticky top-0 flex items-start justify-between gap-3 border-b border-zinc-100 bg-white/95 px-5 py-4 backdrop-blur">
           <div>
             <h2 id="run-detail-title" className="text-lg font-semibold tracking-tight text-zinc-900">
