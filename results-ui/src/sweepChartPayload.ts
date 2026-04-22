@@ -43,7 +43,8 @@ export function sweepChartPayload(
     const arr = map.get(s)!;
     return arr.reduce((a, b) => a + b, 0) / arr.length;
   });
-  let cap = "Mean gap over visible runs per scenario.";
+  let cap =
+    "Mean validation gap (MLP − EML) per scenario, averaged across all depth × hidden runs in scope.";
   if (sc) cap = `Scenario ${sc}: mean gap over visible depth × hidden cells.`;
   return { labels, values, caption: cap, horizontal: labels.length > 10 };
 }

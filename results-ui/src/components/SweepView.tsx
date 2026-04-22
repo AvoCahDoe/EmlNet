@@ -1,8 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { SweepManifest, SweepRun } from "../types";
 import { sweepChartPayload } from "../sweepChartPayload";
 import { fmt4, gapTextClass, mid, SAMPLE_SCENARIOS, sweepFigureUrl } from "../utils";
 import { GapBarChart } from "./GapBarChart";
+import { HoverPeekBar } from "./HoverPeekBar";
+import { IntroductionPanel } from "./IntroductionPanel";
 import { ResultsShell } from "./ResultsShell";
 import { RunDetailModal } from "./RunDetailModal";
 
@@ -24,7 +26,24 @@ export function SweepView({ manifest }: Props) {
   const [hidden, setHidden] = useState("");
   const [allHeatmaps, setAllHeatmaps] = useState(false);
   const [detailRun, setDetailRun] = useState<SweepRun | null>(null);
+  const [peek, setPeek] = useState<SweepRun | null>(null);
+  const peekClearTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const cancelPeekClear = () => {
+    if (peekClearTimer.current) {
+      clearTimeout(peekClearTimer.current);
+      peekClearTimer.current = null;
+    }
+  };
+
+  const schedulePeekClear = () => {
+    cancelPeekClear();
+    peekClearTimer.current = setTimeout(() => setPeek(null), 240);
+  };
+
+  useEffect(() => () => cancelPeekClear(), []);
+
+  /** Table, heatmaps, peek: respect scenario + depth + hidden. */
   const filteredRuns = useMemo(() => {
     return manifest.runs.filter((r) => {
       if (scenario && r.scenario !== scenario) return false;
@@ -34,14 +53,23 @@ export function SweepView({ manifest }: Props) {
     });
   }, [manifest.runs, scenario, depth, hidden]);
 
+  /** Gap overview: aggregate across all scenarios; only depth & hidden from the sidebar apply. */
+  const gapAggregateRuns = useMemo(() => {
+    return manifest.runs.filter((r) => {
+      if (depth && String(r.depth) !== depth) return false;
+      if (hidden && String(r.hidden) !== hidden) return false;
+      return true;
+    });
+  }, [manifest.runs, depth, hidden]);
+
   const tableRows = useMemo(() => {
     return filteredRuns.slice().sort((a, b) => b.val_loss_gap_mlp_minus_eml - a.val_loss_gap_mlp_minus_eml);
   }, [filteredRuns]);
 
   const gapPayload = useMemo(() => {
-    if (filteredRuns.length === 0) return null;
-    return sweepChartPayload(filteredRuns, scenario, depth, hidden);
-  }, [filteredRuns, scenario, depth, hidden]);
+    if (gapAggregateRuns.length === 0) return null;
+    return sweepChartPayload(gapAggregateRuns, "", depth, hidden);
+  }, [gapAggregateRuns, depth, hidden]);
 
   const heatmapList = useMemo(() => {
     if (!allHeatmaps && !scenario) return [];
@@ -80,6 +108,18 @@ export function SweepView({ manifest }: Props) {
     setHidden("");
     setAllHeatmaps(false);
   };
+
+  const peekLines = useMemo(() => {
+    if (!peek) return [];
+    const g = peek.val_loss_gap_mlp_minus_eml;
+    return [
+      { label: "Depth / hidden", value: `${peek.depth} / ${peek.hidden}` },
+      { label: "EML val", value: fmt4(peek.eml_final_val_loss) },
+      { label: "MLP val", value: fmt4(peek.mlp_final_val_loss) },
+      { label: "Δ", value: fmt4(g) },
+      { label: "Acc E / M", value: `${fmt4(peek.eml_final_val_acc)} / ${fmt4(peek.mlp_final_val_acc)}` },
+    ];
+  }, [peek]);
 
   const sidebar = (
     <>
@@ -184,168 +224,185 @@ export function SweepView({ manifest }: Props) {
 
   return (
     <>
-    <ResultsShell badge="Sweep" title="Benchmark results" sidebar={sidebar}>
-      <div className="space-y-10 lg:space-y-12">
-        <header className="max-w-3xl">
-          <p className="text-sm leading-relaxed text-zinc-600">
-            Explore every run: adjust parameters in the sidebar; charts and tables update immediately. Open a row for
-            full figures and training curves.
-          </p>
-        </header>
+      <ResultsShell badge="Sweep" title="Benchmark results" sidebar={sidebar}>
+        <div className={`space-y-10 lg:space-y-12 ${peek ? "pb-28" : "pb-6"}`}>
+          <header className="max-w-3xl">
+            <p className="text-sm leading-relaxed text-zinc-600">
+              Use the sidebar to filter. Hover a table row for a quick readout; open <strong>Details</strong> for full
+              curves and figures.
+            </p>
+          </header>
 
-        <section className="transition-opacity duration-300 ease-out">
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">Sample decision maps</h2>
-          <p className="mt-1 text-xs text-zinc-500">Click a card to focus that scenario.</p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {SAMPLE_SCENARIOS.filter((sc) => scenarios.includes(sc)).map((sc) => {
-              const run = manifest.runs.find((r) => r.scenario === sc);
-              const dec = run?.figures?.decision;
-              if (!run || !dec) return null;
-              return (
-                <button
-                  key={sc}
-                  type="button"
-                  onClick={() => pickGalleryScenario(sc)}
-                  className="group overflow-hidden rounded-2xl border border-zinc-200/80 bg-white text-left shadow-sm transition-all duration-300 ease-out hover:border-zinc-300/90 hover:shadow-md"
-                >
-                  <div className="border-b border-zinc-100 px-3 py-2 text-xs font-medium text-zinc-600 transition-colors duration-200 group-hover:text-zinc-900">
-                    {sc}
-                  </div>
-                  <div className="aspect-[4/3] overflow-hidden bg-zinc-100">
-                    <img
-                      src={sweepFigureUrl(dec)}
-                      alt=""
-                      className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-                      loading="lazy"
-                      decoding="async"
+          <IntroductionPanel />
+
+          <section className="transition-opacity duration-300 ease-out">
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">Sample decision maps</h2>
+            <p className="mt-1 text-xs text-zinc-500">Click a card to focus that scenario. Maps are letterboxed to fit.</p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {SAMPLE_SCENARIOS.filter((sc) => scenarios.includes(sc)).map((sc) => {
+                const run = manifest.runs.find((r) => r.scenario === sc);
+                const dec = run?.figures?.decision;
+                if (!run || !dec) return null;
+                return (
+                  <button
+                    key={sc}
+                    type="button"
+                    onClick={() => pickGalleryScenario(sc)}
+                    className="group overflow-hidden rounded-2xl border border-zinc-200/80 bg-white text-left shadow-sm transition-all duration-300 ease-out hover:border-zinc-300/90 hover:shadow-md"
+                  >
+                    <div className="border-b border-zinc-100 px-3 py-2 text-xs font-medium text-zinc-600 transition-colors duration-200 group-hover:text-zinc-900">
+                      {sc}
+                    </div>
+                    <div className="flex aspect-[4/3] items-center justify-center bg-zinc-100 p-2 sm:p-3">
+                      <img
+                        src={sweepFigureUrl(dec)}
+                        alt=""
+                        className="max-h-full max-w-full object-contain transition-transform duration-500 ease-out group-hover:scale-[1.02]"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">Gap overview</h2>
+            <p className="mt-1 max-w-3xl text-xs leading-relaxed text-zinc-500">
+              One bar per scenario, aggregated over every run that matches <strong className="font-medium text-zinc-700">depth</strong> and{" "}
+              <strong className="font-medium text-zinc-700">hidden width</strong> in the sidebar. The scenario dropdown does{" "}
+              <em>not</em> narrow this chart (it still filters the table and heatmaps below).
+            </p>
+            <div className="mt-4 rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-sm transition-shadow duration-300 sm:p-6">
+              {gapPayload ? (
+                <>
+                  <p className="text-xs leading-relaxed text-zinc-500">
+                    {gapPayload.caption}{" "}
+                    <span className="text-zinc-400">
+                      ({gapAggregateRuns.length} runs · {new Set(gapAggregateRuns.map((r) => r.scenario)).size}{" "}
+                      scenarios)
+                    </span>
+                  </p>
+                  <div className="mt-4">
+                    <GapBarChart
+                      labels={gapPayload.labels}
+                      values={gapPayload.values}
+                      horizontal={gapPayload.horizontal}
                     />
                   </div>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+                </>
+              ) : (
+                <p className="text-sm text-zinc-500">No runs match the current filters.</p>
+              )}
+            </div>
+          </section>
 
-        <section>
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">Gap overview</h2>
-          <div className="mt-4 rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-sm transition-shadow duration-300 sm:p-6">
-            {gapPayload ? (
-              <>
-                <p className="text-xs leading-relaxed text-zinc-500">
-                  {gapPayload.caption}{" "}
-                  <span className="text-zinc-400">({filteredRuns.length} runs)</span>
+          <section>
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">Heatmaps</h2>
+            <div className="mt-4 rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-sm sm:p-6">
+              {!allHeatmaps && !scenario ? (
+                <p className="text-sm leading-relaxed text-zinc-500">
+                  Choose a scenario or enable <span className="font-medium text-zinc-700">All scenario heatmaps</span>{" "}
+                  in the sidebar to show heatmaps here.
                 </p>
-                <div className="mt-4">
-                  <GapBarChart
-                    labels={gapPayload.labels}
-                    values={gapPayload.values}
-                    horizontal={gapPayload.horizontal}
-                  />
-                </div>
-              </>
-            ) : (
-              <p className="text-sm text-zinc-500">No runs match the current filters.</p>
-            )}
-          </div>
-        </section>
-
-        <section>
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">Heatmaps</h2>
-          <div className="mt-4 rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-sm sm:p-6">
-            {!allHeatmaps && !scenario ? (
-              <p className="text-sm leading-relaxed text-zinc-500">
-                Choose a scenario or enable <span className="font-medium text-zinc-700">All scenario heatmaps</span>{" "}
-                in the sidebar to show heatmaps here.
-              </p>
-            ) : heatmapList.length === 0 ? (
-              <p className="text-sm text-zinc-500">No heatmaps for this selection.</p>
-            ) : (
-              <div className="grid gap-4 sm:grid-cols-2">
-                {heatmapList.map((hm) => (
-                  <div
-                    key={`${hm.scenario}-${hm.path}`}
-                    className="overflow-hidden rounded-xl border border-zinc-100 bg-zinc-50/40 transition-shadow duration-300 hover:shadow-sm"
-                  >
-                    <div className="border-b border-zinc-100 px-3 py-2 text-xs font-medium text-zinc-600">
-                      {hm.scenario}
+              ) : heatmapList.length === 0 ? (
+                <p className="text-sm text-zinc-500">No heatmaps for this selection.</p>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {heatmapList.map((hm) => (
+                    <div
+                      key={`${hm.scenario}-${hm.path}`}
+                      className="overflow-hidden rounded-xl border border-zinc-100 bg-zinc-50/40 transition-shadow duration-300 hover:shadow-sm"
+                    >
+                      <div className="border-b border-zinc-100 px-3 py-2 text-xs font-medium text-zinc-600">
+                        {hm.scenario}
+                      </div>
+                      <img src={sweepFigureUrl(hm.path)} alt="" className="block w-full bg-white" loading="lazy" />
                     </div>
-                    <img src={sweepFigureUrl(hm.path)} alt="" className="block w-full bg-white" loading="lazy" />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
 
-        <section className="overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-sm transition-shadow duration-300">
-          <div className="border-b border-zinc-100 px-4 py-4 sm:px-6">
-            <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">All runs</h2>
-            <p className="mt-1 text-xs text-zinc-500">Sorted by validation gap (MLP − EML), descending.</p>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-sm">
-              <thead>
-                <tr className="border-b border-zinc-100 bg-zinc-50/90 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
-                  <th className="px-4 py-3 sm:px-5">Scenario</th>
-                  <th className="px-3 py-3 text-right">Depth</th>
-                  <th className="px-3 py-3 text-right">Hidden</th>
-                  <th className="px-3 py-3 text-right">Epochs</th>
-                  <th className="px-3 py-3 text-right">EML val</th>
-                  <th className="px-3 py-3 text-right">MLP val</th>
-                  <th className="px-3 py-3 text-right">Gap</th>
-                  <th className="px-3 py-3 text-right">Acc</th>
-                  <th className="px-4 py-3 sm:px-5" />
-                </tr>
-              </thead>
-              <tbody>
-                {tableRows.length === 0 ? (
-                  <tr>
-                    <td colSpan={9} className="px-5 py-14 text-center text-sm text-zinc-400">
-                      No runs match these filters.
-                    </td>
+          <section className="overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-sm transition-shadow duration-300">
+            <div className="border-b border-zinc-100 px-4 py-4 sm:px-6">
+              <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">All runs</h2>
+              <p className="mt-1 text-xs text-zinc-500">
+                Sorted by Δ = MLP val − EML val (desc). Hover a row for metrics; click Details to open.
+              </p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[720px] text-sm">
+                <thead>
+                  <tr className="border-b border-zinc-100 bg-zinc-50/90 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                    <th className="px-4 py-3 sm:px-5">Scenario</th>
+                    <th className="px-3 py-3 text-right">Depth</th>
+                    <th className="px-3 py-3 text-right">Hidden</th>
+                    <th className="px-3 py-3 text-right">Epochs</th>
+                    <th className="px-3 py-3 text-right">EML val</th>
+                    <th className="px-3 py-3 text-right">MLP val</th>
+                    <th className="px-3 py-3 text-right">Gap</th>
+                    <th className="px-3 py-3 text-right">Acc</th>
+                    <th className="px-4 py-3 sm:px-5" />
                   </tr>
-                ) : (
-                  tableRows.map((r) => {
-                    const g = r.val_loss_gap_mlp_minus_eml;
-                    return (
-                      <tr
-                        key={r.rel_dir}
-                        className={`border-b border-zinc-50 transition-colors duration-150 ease-out hover:bg-zinc-50/90 ${detailRun?.rel_dir === r.rel_dir ? "bg-zinc-100/80" : ""}`}
-                      >
-                        <td className="px-4 py-2.5 font-medium text-zinc-800 sm:px-5">{r.scenario}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-zinc-600">{r.depth}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-zinc-600">{r.hidden}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-zinc-500">{r.epochs}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-zinc-600">{fmt4(r.eml_final_val_loss)}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-zinc-600">{fmt4(r.mlp_final_val_loss)}</td>
-                        <td className={`px-3 py-2.5 text-right tabular-nums ${gapTextClass(g)}`}>{fmt4(g)}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-xs text-zinc-500">
-                          {fmt4(r.eml_final_val_acc)} / {fmt4(r.mlp_final_val_acc)}
-                        </td>
-                        <td className="px-4 py-2.5 sm:px-5">
-                          <button
-                            type="button"
-                            onClick={() => setDetailRun(r)}
-                            className="rounded-lg px-2 py-1 text-xs font-medium text-zinc-600 transition-colors duration-150 hover:bg-zinc-100 hover:text-zinc-900"
-                          >
-                            Details
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </div>
-    </ResultsShell>
-    <RunDetailModal
-      key={detailRun?.rel_dir ?? "closed"}
-      run={detailRun}
-      onClose={() => setDetailRun(null)}
-    />
+                </thead>
+                <tbody onMouseLeave={schedulePeekClear}>
+                  {tableRows.length === 0 ? (
+                    <tr>
+                      <td colSpan={9} className="px-5 py-14 text-center text-sm text-zinc-400">
+                        No runs match these filters.
+                      </td>
+                    </tr>
+                  ) : (
+                    tableRows.map((r) => {
+                      const g = r.val_loss_gap_mlp_minus_eml;
+                      return (
+                        <tr
+                          key={r.rel_dir}
+                          onMouseEnter={() => {
+                            cancelPeekClear();
+                            setPeek(r);
+                          }}
+                          className={`border-b border-zinc-50 transition-colors duration-150 ease-out hover:bg-zinc-100/90 ${detailRun?.rel_dir === r.rel_dir ? "bg-zinc-100" : ""}`}
+                        >
+                          <td className="px-4 py-2.5 font-medium text-zinc-800 sm:px-5">{r.scenario}</td>
+                          <td className="px-3 py-2.5 text-right tabular-nums text-zinc-600">{r.depth}</td>
+                          <td className="px-3 py-2.5 text-right tabular-nums text-zinc-600">{r.hidden}</td>
+                          <td className="px-3 py-2.5 text-right tabular-nums text-zinc-500">{r.epochs}</td>
+                          <td className="px-3 py-2.5 text-right tabular-nums text-zinc-600">{fmt4(r.eml_final_val_loss)}</td>
+                          <td className="px-3 py-2.5 text-right tabular-nums text-zinc-600">{fmt4(r.mlp_final_val_loss)}</td>
+                          <td className={`px-3 py-2.5 text-right tabular-nums ${gapTextClass(g)}`}>{fmt4(g)}</td>
+                          <td className="px-3 py-2.5 text-right tabular-nums text-xs text-zinc-500">
+                            {fmt4(r.eml_final_val_acc)} / {fmt4(r.mlp_final_val_acc)}
+                          </td>
+                          <td className="px-4 py-2.5 sm:px-5">
+                            <button
+                              type="button"
+                              onClick={() => setDetailRun(r)}
+                              className="rounded-lg px-2 py-1 text-xs font-medium text-zinc-600 transition-colors duration-150 hover:bg-zinc-200/80 hover:text-zinc-900"
+                            >
+                              Details
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </ResultsShell>
+      {peek ? <HoverPeekBar title={peek.scenario} lines={peekLines} /> : null}
+      <RunDetailModal
+        key={detailRun?.rel_dir ?? "closed"}
+        run={detailRun}
+        onClose={() => setDetailRun(null)}
+      />
     </>
   );
 }

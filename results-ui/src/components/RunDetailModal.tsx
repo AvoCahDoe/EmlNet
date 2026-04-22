@@ -13,6 +13,8 @@ type Props = {
   onClose: () => void;
 };
 
+type ZoomState = { src: string; title: string };
+
 const font = { size: 11, family: "system-ui, Segoe UI, sans-serif" };
 const grid = "rgba(24, 24, 27, 0.06)";
 
@@ -35,6 +37,7 @@ function pngFigureKeys(run: SweepRun, all: boolean): string[] {
 export function RunDetailModal({ run, onClose }: Props) {
   const [series, setSeries] = useState<ValLossSeries | null>(null);
   const [loadAllFigs, setLoadAllFigs] = useState(false);
+  const [zoom, setZoom] = useState<ZoomState | null>(null);
 
   const historiesUrl = run?.figures?.histories ? sweepFigureUrl(run.figures.histories) : null;
 
@@ -65,11 +68,21 @@ export function RunDetailModal({ run, onClose }: Props) {
   useEffect(() => {
     if (!run) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key !== "Escape") return;
+      if (zoom) {
+        e.preventDefault();
+        setZoom(null);
+        return;
+      }
+      onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [run, onClose]);
+  }, [run, onClose, zoom]);
+
+  useEffect(() => {
+    if (!run) setZoom(null);
+  }, [run]);
 
   const lineData = useMemo(() => {
     if (!series || (!series.eml.length && !series.mlp.length)) return null;
@@ -128,115 +141,158 @@ export function RunDetailModal({ run, onClose }: Props) {
   const extraCount = Math.max(0, pngFigureKeys(run, true).length - compactOnly.length);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-zinc-950/35 p-4 backdrop-blur-[2px] transition-opacity duration-200 ease-out sm:items-center"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="run-detail-title"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div className="max-h-[90vh] w-full max-w-3xl origin-bottom overflow-y-auto rounded-2xl border border-zinc-200/90 bg-white shadow-2xl transition-all duration-300 ease-out sm:origin-center">
-        <div className="sticky top-0 flex items-start justify-between gap-3 border-b border-zinc-100 bg-white/95 px-5 py-4 backdrop-blur">
-          <div>
-            <h2 id="run-detail-title" className="text-lg font-semibold tracking-tight text-zinc-900">
-              {run.scenario}
-            </h2>
-            <p className="mt-0.5 text-sm text-zinc-500">
-              depth {run.depth} · hidden {run.hidden} · {run.epochs} epochs
-            </p>
-            {historiesUrl && (
-              <a
-                href={historiesUrl}
-                className="mt-2 inline-block text-xs text-zinc-600 underline underline-offset-2 hover:text-zinc-900"
-                target="_blank"
-                rel="noreferrer"
-              >
-                histories.json
-              </a>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-100"
-          >
-            Close
-          </button>
-        </div>
-
-        <div className="space-y-5 px-5 py-5">
-          <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-            <div className="rounded-xl border border-zinc-100 bg-zinc-50/80 px-3 py-2">
-              <dt className="text-zinc-500">EML val loss</dt>
-              <dd className="font-mono font-medium text-zinc-900">{fmt4(run.eml_final_val_loss)}</dd>
-            </div>
-            <div className="rounded-xl border border-zinc-100 bg-zinc-50/80 px-3 py-2">
-              <dt className="text-zinc-500">MLP val loss</dt>
-              <dd className="font-mono font-medium text-zinc-900">{fmt4(run.mlp_final_val_loss)}</dd>
-            </div>
-            <div className="rounded-xl border border-zinc-100 bg-zinc-50/80 px-3 py-2">
-              <dt className="text-zinc-500">Gap (MLP − EML)</dt>
-              <dd className="font-mono font-medium text-zinc-900">{fmt4(run.val_loss_gap_mlp_minus_eml)}</dd>
-            </div>
-            <div className="rounded-xl border border-zinc-100 bg-zinc-50/80 px-3 py-2">
-              <dt className="text-zinc-500">EML / MLP acc</dt>
-              <dd className="font-mono font-medium text-zinc-900">
-                {fmt4(run.eml_final_val_acc)} / {fmt4(run.mlp_final_val_acc)}
-              </dd>
-            </div>
-          </dl>
-
-          <section>
-            <h3 className="mb-2 text-sm font-medium text-zinc-700">Validation BCE</h3>
-            {lineData ? (
-              <div className="h-56 rounded-xl border border-zinc-100 bg-white p-2 sm:h-64">
-                <Line data={lineData} options={lineOptions} />
-              </div>
-            ) : (
-              <p className="rounded-xl border border-dashed border-zinc-200 bg-zinc-50 px-4 py-6 text-center text-sm text-zinc-500">
-                No val loss series in histories.json for this run.
+    <>
+      <div
+        className="fixed inset-0 z-50 flex items-end justify-center bg-zinc-950/35 p-4 backdrop-blur-[2px] transition-opacity duration-200 ease-out sm:items-center"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="run-detail-title"
+        onMouseDown={(e) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
+      >
+        <div className="max-h-[90vh] w-full max-w-3xl origin-bottom overflow-y-auto rounded-2xl border border-zinc-200/90 bg-white shadow-2xl transition-all duration-300 ease-out sm:origin-center">
+          <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-zinc-100 bg-white/95 px-5 py-4 backdrop-blur">
+            <div>
+              <h2 id="run-detail-title" className="text-lg font-semibold tracking-tight text-zinc-900">
+                {run.scenario}
+              </h2>
+              <p className="mt-0.5 text-sm text-zinc-500">
+                depth {run.depth} · hidden {run.hidden} · {run.epochs} epochs
               </p>
-            )}
-          </section>
-
-          <section>
-            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-              <h3 className="text-sm font-medium text-zinc-700">Figures</h3>
-              {extraCount > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setLoadAllFigs(true)}
-                  disabled={loadAllFigs}
-                  className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
+              {historiesUrl && (
+                <a
+                  href={historiesUrl}
+                  className="mt-2 inline-block text-xs text-zinc-600 underline underline-offset-2 hover:text-zinc-900"
+                  target="_blank"
+                  rel="noreferrer"
                 >
-                  Load all figure PNGs
-                </button>
+                  histories.json
+                </a>
               )}
             </div>
-            {figKeys.length === 0 ? (
-              <p className="text-sm text-zinc-500">No PNG figures listed for this run.</p>
-            ) : (
-              <div className="grid gap-4 sm:grid-cols-2">
-                {figKeys.map((name) => (
-                  <figure key={name} className="overflow-hidden rounded-xl border border-zinc-100 bg-zinc-50/50">
-                    <figcaption className="border-b border-zinc-100 px-3 py-2 text-xs font-medium text-zinc-600">
-                      {name}
-                    </figcaption>
-                    <img
-                      src={sweepFigureUrl(run.figures![name]!)}
-                      alt={name}
-                      className="w-full bg-white"
-                      loading="lazy"
-                    />
-                  </figure>
-                ))}
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-100"
+            >
+              Close
+            </button>
+          </div>
+
+          <div className="space-y-5 px-5 py-5">
+            <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+              <div className="rounded-xl border border-zinc-100 bg-zinc-50/80 px-3 py-2">
+                <dt className="text-zinc-500">EML val loss</dt>
+                <dd className="font-mono font-medium text-zinc-900">{fmt4(run.eml_final_val_loss)}</dd>
               </div>
-            )}
-          </section>
+              <div className="rounded-xl border border-zinc-100 bg-zinc-50/80 px-3 py-2">
+                <dt className="text-zinc-500">MLP val loss</dt>
+                <dd className="font-mono font-medium text-zinc-900">{fmt4(run.mlp_final_val_loss)}</dd>
+              </div>
+              <div className="rounded-xl border border-zinc-100 bg-zinc-50/80 px-3 py-2">
+                <dt className="text-zinc-500">Gap (MLP − EML)</dt>
+                <dd className="font-mono font-medium text-zinc-900">{fmt4(run.val_loss_gap_mlp_minus_eml)}</dd>
+              </div>
+              <div className="rounded-xl border border-zinc-100 bg-zinc-50/80 px-3 py-2">
+                <dt className="text-zinc-500">EML / MLP acc</dt>
+                <dd className="font-mono font-medium text-zinc-900">
+                  {fmt4(run.eml_final_val_acc)} / {fmt4(run.mlp_final_val_acc)}
+                </dd>
+              </div>
+            </dl>
+
+            <section>
+              <h3 className="mb-2 text-sm font-medium text-zinc-700">Validation BCE</h3>
+              {lineData ? (
+                <div className="h-56 rounded-xl border border-zinc-100 bg-white p-2 sm:h-64">
+                  <Line data={lineData} options={lineOptions} />
+                </div>
+              ) : (
+                <p className="rounded-xl border border-dashed border-zinc-200 bg-zinc-50 px-4 py-6 text-center text-sm text-zinc-500">
+                  No val loss series in histories.json for this run.
+                </p>
+              )}
+            </section>
+
+            <section>
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-sm font-medium text-zinc-700">Figures</h3>
+                {extraCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setLoadAllFigs(true)}
+                    disabled={loadAllFigs}
+                    className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
+                  >
+                    Load all figure PNGs
+                  </button>
+                )}
+              </div>
+              <p className="mb-3 text-[11px] text-zinc-500">Click an image to zoom and read fine detail.</p>
+              {figKeys.length === 0 ? (
+                <p className="text-sm text-zinc-500">No PNG figures listed for this run.</p>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {figKeys.map((name) => {
+                    const src = sweepFigureUrl(run.figures![name]!);
+                    return (
+                      <figure key={name} className="overflow-hidden rounded-xl border border-zinc-100 bg-zinc-50/50">
+                        <figcaption className="border-b border-zinc-100 px-3 py-2 text-xs font-medium text-zinc-600">
+                          {name}
+                        </figcaption>
+                        <button
+                          type="button"
+                          onClick={() => setZoom({ src, title: `${run.scenario} — ${name}` })}
+                          className="group relative block w-full cursor-zoom-in bg-white text-left outline-none focus-visible:ring-2 focus-visible:ring-zinc-900/15 focus-visible:ring-offset-2"
+                        >
+                          <img
+                            src={src}
+                            alt={name}
+                            className="w-full transition-transform duration-300 ease-out group-hover:scale-[1.02]"
+                            loading="lazy"
+                          />
+                          <span className="pointer-events-none absolute bottom-2 right-2 rounded-md bg-zinc-900/75 px-2 py-0.5 text-[10px] font-medium text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                            Zoom
+                          </span>
+                        </button>
+                      </figure>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+          </div>
         </div>
       </div>
-    </div>
+
+      {zoom ? (
+        <div
+          className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Zoomed figure"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setZoom(null);
+          }}
+        >
+          <div className="relative flex max-h-full max-w-full flex-col items-center gap-3">
+            <p className="max-w-[90vw] truncate text-center text-xs font-medium text-zinc-200">{zoom.title}</p>
+            <img
+              src={zoom.src}
+              alt=""
+              className="max-h-[min(88vh,1200px)] max-w-[min(96vw,1400px)] object-contain shadow-2xl"
+            />
+            <button
+              type="button"
+              onClick={() => setZoom(null)}
+              className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur transition-colors hover:bg-white/20"
+            >
+              Close zoom
+            </button>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
