@@ -7,6 +7,7 @@ import { HoverPeekBar } from "./HoverPeekBar";
 import { IntroductionPanel } from "./IntroductionPanel";
 import { ResultsShell } from "./ResultsShell";
 import { RunDetailModal } from "./RunDetailModal";
+import { ScenarioFocusSection } from "./ScenarioFocusSection";
 
 const field =
   "mt-1.5 w-full rounded-xl border border-zinc-200/90 bg-zinc-50/80 px-3 py-2.5 text-sm text-zinc-900 outline-none transition-[border-color,box-shadow,background-color] duration-200 ease-out focus:border-zinc-300 focus:bg-white focus:ring-2 focus:ring-zinc-900/[0.06]";
@@ -298,6 +299,10 @@ export function SweepView({ manifest }: Props) {
               )}
             </div>
           </section>
+
+          {scenario ? (
+            <ScenarioFocusSection scenario={scenario} runs={filteredRuns} onOpenDetail={setDetailRun} />
+          ) : null}
 
           <section>
             <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">Heatmaps</h2>
